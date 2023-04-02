@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "vector.c"
-#include "cpu.c"
+#include "cpu.h"
 
 int main(void)
 {

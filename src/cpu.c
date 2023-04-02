@@ -1,7 +1,5 @@
 #include "cpu.h"
-#include "instructions.c"
-
-#define PROGRAM_LENGTH 100
+#include "instructions.h"
 
 CPU new_cpu(void)
 {

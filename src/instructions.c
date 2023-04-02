@@ -1,6 +1,6 @@
-#include "cpu.h"
-#include "instructions.h"
 #include <stdio.h>
+#include "instructions.h"
+#include "cpu.h"
 
 void brk(CPU *cpu)
 {

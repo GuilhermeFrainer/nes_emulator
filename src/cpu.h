@@ -19,4 +19,7 @@ typedef struct
     Source: https://www.nesdev.org/wiki/Status_flags
 */
 
+CPU new_cpu(void);
+void interpret(CPU *cpu, uint8_t program[]);
+
 #endif
