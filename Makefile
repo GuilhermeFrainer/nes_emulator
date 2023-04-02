@@ -1,11 +1,9 @@
 CC = gcc
-#CFLAGS = -g -o
-#OBJ = cpu.o instructions.o
-#OBJDIR = obj
+OBJ = cpu.o instructions.o
 VPATH = src tests
 
-nes_emulator: main.o cpu.o instructions.o
-	cc -g -o nes_emulator main.o cpu.o instructions.o
+nes_emulator: main.o $(OBJ)
+	$(CC) -g -o nes_emulator main.o $(OBJ)
 
 main.o: main.c cpu.h
 
@@ -14,9 +12,6 @@ cpu.o: cpu.h cpu.c instructions.h
 instructions.o: instructions.h instructions.c cpu.h
 
 test.o: test.c cpu.h instructions.h
-
-#$(OBJ):
-#	mkdir $@
 
 .PHONY: clean
 
