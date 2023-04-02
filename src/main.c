@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include "vector.c"
 #include "cpu.h"
 
 int main(void)
 {
-    CPU cpu = get_cpu();
-    cpu_interpret(&cpu, 5);
-
+    int program[] = {0xa9, 0xc0, 0xaa, 0xe8, 0x00};
+    
 }

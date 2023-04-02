@@ -1,9 +1,8 @@
 VPATH = src
 
 nes_emulator : main.o
-	cc -o nes_emulator main.o
+	cc -g -o nes_emulator main.o
 
-main.o : src/cpu.h
+main.o : cpu.h vector.o
 
-clean :
-	rm *.o
+vector.o : vector.h
