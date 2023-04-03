@@ -8,6 +8,4 @@ Write tests (and subsequently remove the tests dir from the .gitignore file).
 
 Possibly make my own testing framework.  
 
-Use Makefile to save object files in their own directory.  
-
 Possibly put header files into a separate directory.
