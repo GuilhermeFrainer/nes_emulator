@@ -11,6 +11,8 @@ cpu.o: cpu.h cpu.c instructions.h
 
 instructions.o: instructions.h instructions.c cpu.h
 
+test: test.o $(OBJ)
+
 test.o: test.c cpu.h instructions.h
 
 .PHONY: clean
