@@ -1,21 +1,30 @@
 CC = gcc
-OBJ = cpu.o instructions.o
-VPATH = src tests
+SRCDIR = src
+OBJDIR = obj
+TEST = tests
+SRCS = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
 
-nes_emulator: main.o $(OBJ)
-	$(CC) -g -o nes_emulator main.o $(OBJ)
+nes_emulator: $(OBJS)
+	$(CC) -g -o nes_emulator $(OBJS)
 
-main.o: main.c cpu.h
+$(OBJDIR)/main.o: $(SRCDIR)/main.c $(SRCDIR)/cpu.h $(OBJDIR)
+	$(CC) -c $< -o $@
 
-cpu.o: cpu.h cpu.c instructions.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/%.h $(OBJDIR)
+	$(CC) -c $< -o $@
 
-instructions.o: instructions.h instructions.c cpu.h
+# Create an obj directory if there isn't one
+$(OBJDIR):
+	mkdir $@
 
-test: test.o $(OBJ)
+test: $(OBJDIR)/test.o $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
+	$(CC) -o test  $(OBJDIR)/test.o $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
 
-test.o: test.c cpu.h instructions.h
+$(OBJDIR)/test.o: $(TEST)/test.c
+	$(CC) -c $< -o $@
 
 .PHONY: clean
 
 clean:
-	rm *.o
+	rm $(OBJDIR)/*.o
