@@ -35,12 +35,11 @@ run: $(BIN)
 	./bin/nes_emulator
 
 
-# Testing-related instructions
-$(BIN)/test: $(OBJDIR)/test.o $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
-	$(CC) -o test  $(OBJDIR)/test.o $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
+# TESTS
+test: $(BINDIR)/test_cpu
 
-$(OBJDIR)/test.o: $(TESTDIR)/test.c
-	$(CC) -c $< -o $@
+$(BINDIR)/test_cpu: $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o $(TESTDIR)/test_framework.h $(TESTDIR)/test_cpu.c $(BINDIR) 
+	$(CC) $(TESTDIR)/test_cpu.c -o $(BINDIR)/test_cpu $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
 
 $(TESTDIR):
 	mkdir $@
