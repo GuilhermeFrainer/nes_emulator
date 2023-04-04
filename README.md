@@ -6,6 +6,8 @@ Inspired by the Rust guide to make a NES emulator. Source: https://bugzmanov.git
 
 Write tests (and subsequently remove the tests dir from the .gitignore file).  
 
-Possibly make my own testing framework.  
+Make my own testing framework.  
+    Macros for testing
+    Makefile command to test automatically
 
 Possibly put header files into a separate directory.
