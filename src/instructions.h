@@ -2,6 +2,11 @@
 #define INSTRUCTIONS_H
 
 #include "cpu.h"
+#include <stdint.h>
+
+// CPU flag bits
+#define NEGATIVE_FLAG 0b10000000
+#define ZERO_FLAG 0b00000010
 
 void brk(CPU *cpu);
 void inx(CPU *cpu);

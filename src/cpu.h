@@ -9,6 +9,7 @@ typedef struct
     uint8_t reg_a;
     uint8_t reg_x;
     uint8_t reg_y;
+    uint8_t memory[0xFFFF];
 } CPU;
 
 /* 
@@ -20,6 +21,11 @@ typedef struct
 */
 
 CPU new_cpu(void);
-void interpret(CPU *cpu, uint8_t program[]);
+uint8_t read_mem(CPU *cpu, uint16_t addr);
+uint16_t read_mem_u16(CPU *cpu, uint16_t addr);
+void write_mem(CPU *cpu, uint8_t value, uint16_t addr);
+void write_mem_u16(CPU *cpu, uint16_t value, uint16_t addr);
+void reset(CPU *cpu);
+void load(CPU *cpu, uint8_t program[], int program_length);
 
 #endif

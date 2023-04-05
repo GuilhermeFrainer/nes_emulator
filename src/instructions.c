@@ -31,19 +31,19 @@ void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
     // Update zero flag
     if (result == 0)
     {
-        cpu->status = cpu->status | 0b00000010;
+        cpu->status = cpu->status | ZERO_FLAG;
     }
     else
     {
-        cpu->status = cpu->status & 0b11111101;
+        cpu->status = cpu->status & !ZERO_FLAG;
     }
     // Update negative flag
     if (result & 0b10000000 != 0)
     {
-        cpu->status = cpu->status | 0b10000000;
+        cpu->status = cpu->status | NEGATIVE_FLAG;
     }
     else
     {
-        cpu->status = cpu->status & 0b01111111;
+        cpu->status = cpu->status & !NEGATIVE_FLAG;
     }
 }

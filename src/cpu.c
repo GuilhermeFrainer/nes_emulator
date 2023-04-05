@@ -12,17 +12,47 @@ CPU new_cpu(void)
     return cpu;
 }
 
-void interpret(CPU *cpu, uint8_t program[])
+uint8_t read_mem(CPU *cpu, uint16_t addr)
 {
-    while (1)
+    return cpu->memory[addr];
+}
+
+// Deals with NES's little-endianess
+uint16_t read_mem_u16(CPU *cpu, uint16_t addr)
+{
+    uint16_t low = read_mem(cpu, addr);
+    uint16_t high = read_mem(cpu, addr + 1);
+    high = high << 8;
+    return high | low;
+}
+
+void write_mem(CPU *cpu, uint8_t value, uint16_t addr)
+{
+    cpu->memory[addr] = value;
+}
+
+void write_mem_u16(CPU *cpu, uint16_t value, uint16_t addr)
+{
+    uint8_t low = value & 0xFF;
+    uint8_t high = value >> 8;
+    write_mem(cpu, low, addr);
+    write_mem(cpu, high, addr + 1);
+}
+
+void reset(CPU *cpu)
+{
+    cpu->reg_a = 0;
+    cpu->reg_x = 0;
+    cpu->reg_y;
+    cpu->status = 0;
+    cpu->program_counter = read_mem_u16(cpu, 0xFFFC);
+}
+
+void load(CPU *cpu, uint8_t program[], int program_length)
+{
+    for (int i = 0; i < program_length; i++)
     {
-        switch (program[cpu->program_counter])
-        {
-            case 0x00: brk(cpu); return;
-            case 0xe8: inx(cpu); break;
-            case 0xa9: lda(cpu, program[cpu->program_counter + 1]); break;
-            case 0xaa: tax(cpu); break;
-        }
-        cpu->program_counter += 1;
+        cpu->memory[i + 0x8000] = program[i];
     }
+    write_mem_u16(cpu, 0x8000, 0xFFFC);
 }
