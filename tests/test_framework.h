@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#define assert_eq_u8(actual, expected) \
+#define assert_eq(actual, expected) \
     if (actual == expected) { successful_tests++; } \
     else { printf("%s failed at %s at line %i.\n", __FUNCTION__,  __FILE__, __LINE__); failed_tests++; }
 

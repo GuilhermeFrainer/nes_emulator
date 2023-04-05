@@ -43,7 +43,7 @@ void reset(CPU *cpu)
 {
     cpu->reg_a = 0;
     cpu->reg_x = 0;
-    cpu->reg_y;
+    cpu->reg_y = 0;
     cpu->status = 0;
     cpu->program_counter = read_mem_u16(cpu, 0xFFFC);
 }
