@@ -20,7 +20,7 @@ typedef enum
     IndirectX,
     IndirectY,
 
-    NoneAddressing
+    Implied
 } AddrMode;
 
 typedef struct
@@ -35,6 +35,8 @@ typedef struct
 // CPU flag bits
 #define NEGATIVE_FLAG 0b10000000
 #define ZERO_FLAG 0b00000010
+
+Instruction get_instruction_from_opcode(uint8_t opcode);
 
 void brk(CPU *cpu);
 void inx(CPU *cpu);

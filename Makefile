@@ -11,7 +11,6 @@ TESTDIR = tests
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
 BIN = $(BINDIR)/nes_emulator
-CPUOBJS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
 
 
 # Main file instructions
@@ -37,10 +36,16 @@ run: $(BIN)
 
 
 # TESTS
-test: $(BINDIR)/test_cpu
+TEST_REQS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o $(TESTDIR)/test_framework.h $(BINDIR)
+CPUOBJS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
 
-$(BINDIR)/test_cpu: $(CPUOBJS) $(TESTDIR)/test_framework.h $(TESTDIR)/test_cpu.c $(BINDIR) 
+test: $(BINDIR)/test_cpu $(BINDIR)/test_instructions
+
+$(BINDIR)/test_cpu: $(TEST_REQS) $(TESTDIR)/test_cpu.c
 	$(CC) $(TESTDIR)/test_cpu.c -o $(BINDIR)/test_cpu $(CPUOBJS)
+
+$(BINDIR)/test_instructions: $(TEST_REQS) $(TESTDIR)/test_instructions.c
+	$(CC) $(TESTDIR)/test_instructions.c -o $(BINDIR)/test_instructions $(CPUOBJS)
 
 $(TESTDIR):
 	mkdir $@
