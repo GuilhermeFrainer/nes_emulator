@@ -55,4 +55,48 @@ void load(CPU *cpu, uint8_t program[], int program_length)
         cpu->memory[i + 0x8000] = program[i];
     }
     write_mem_u16(cpu, 0x8000, 0xFFFC);
+    cpu->program_counter = 0x8000;
+}
+
+void run(CPU *cpu)
+{
+    while (1)
+    {
+        uint8_t opcode = read_mem(cpu, cpu->program_counter);
+        Instruction inst = inst_list[opcode];
+        uint16_t original_pc_state = cpu->program_counter;
+        cpu->program_counter++;
+
+        switch (opcode)
+        {
+        case 0x00:
+            brk();
+            return;
+
+        case 0xE8:
+            inx(cpu);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+
+        case 0xA9:
+        case 0xA5:
+        case 0xB5:
+        case 0xAD:
+        case 0xBD:
+        case 0xB9:
+        case 0xA1:
+        case 0xB1:
+            lda(cpu, inst.mode);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+
+        case 0xAA:
+            tax(cpu);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+        
+        default:
+            continue;
+        }
+    }
 }

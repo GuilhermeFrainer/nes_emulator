@@ -1,11 +1,13 @@
 #include "test_framework.h"
 #include "../src/cpu.h"
+#include "../src/instructions.h"
 
 int main(void);
 void test_new(void);
 void test_read_and_write_mem(void);
 void test_reset(void);
 void test_load(void);
+void test_run(void);
 
 int successful_tests = 0;
 int failed_tests = 0;
@@ -16,6 +18,7 @@ int main(void)
     test_read_and_write_mem();
     test_reset();
     test_load();
+    test_run();
     end_tests();
 }
 
@@ -69,4 +72,15 @@ void test_load(void)
     assert_eq(cpu.memory[0x8000], 0xAB);
     assert_eq(cpu.memory[0x8001], 0xCD);
     assert_eq(cpu.memory[0x8002], 0xDE);
+}
+
+void test_run(void)
+{
+    CPU cpu = new_cpu();
+    populate_inst_list();
+    uint8_t program[] = { 0xA9, 0xC0, 0xAA, 0xE8, 0x00 };
+    load(&cpu, program, 5);
+    run(&cpu);
+    assert_eq(cpu.reg_a, 0xC0);
+    assert_eq(cpu.reg_x, 0xC1);
 }

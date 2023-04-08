@@ -41,7 +41,7 @@ extern Instruction inst_list[0xFF];
 void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
 
-void brk(CPU *cpu);
+void brk();
 void inx(CPU *cpu);
 void lda(CPU *cpu, AddrMode mode);
 void tax(CPU *cpu);

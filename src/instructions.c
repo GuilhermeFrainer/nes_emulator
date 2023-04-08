@@ -37,7 +37,7 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
     }
 }
 
-void brk(CPU *cpu)
+void brk()
 {
     return;
 }
@@ -50,7 +50,6 @@ void inx(CPU *cpu)
 
 void lda(CPU *cpu, AddrMode mode)
 {
-    cpu->program_counter++;
     uint16_t addr = get_operand_addr(cpu, mode);
     cpu->reg_a = read_mem(cpu, addr);
     update_zero_and_negative_flags(cpu, cpu->reg_a);

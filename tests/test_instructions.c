@@ -1,17 +1,14 @@
 #include "test_framework.h"
 #include "../src/instructions.h"
 #include "../src/cpu.h"
-#include <stdio.h>
 
 int successful_tests = 0;
 int failed_tests = 0;
 
+void test_get_instruction_from_opcode(void);
 void test_populate_inst_list(void);
 void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
-
-// Instruction tests
-void test_lda(void);
 
 int main(void)
 {
@@ -19,6 +16,13 @@ int main(void)
     test_get_operand_addr();
     test_populate_inst_list();
     end_tests();
+}
+
+void test_get_instruction_from_opcode(void)
+{
+    Instruction inst = get_instruction_from_opcode(0xA9);
+    assert_eq(inst.opcode, 0xA9);
+    assert_eq(inst.bytes, 2);
 }
 
 void test_populate_inst_list(void)
@@ -29,13 +33,6 @@ void test_populate_inst_list(void)
     Instruction lda = inst_list[0xA9];
     assert_eq(lda.opcode, 0xA9);
     assert_eq(lda.mode, Immediate);
-}
-
-void test_lda()
-{
-    CPU cpu = new_cpu();
-    uint8_t program[] = {0xA9, 0xAB};
-    // TODO
 }
 
 void test_update_zero_and_negative_flags(void)
