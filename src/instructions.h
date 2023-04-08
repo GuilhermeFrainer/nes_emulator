@@ -32,15 +32,18 @@ typedef struct
     AddrMode mode;
 } Instruction;
 
+extern Instruction inst_list[0xFF];
+
 // CPU flag bits
 #define NEGATIVE_FLAG 0b10000000
 #define ZERO_FLAG 0b00000010
 
+void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
 
 void brk(CPU *cpu);
 void inx(CPU *cpu);
-void lda(CPU *cpu, uint8_t value);
+void lda(CPU *cpu, AddrMode mode);
 void tax(CPU *cpu);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);

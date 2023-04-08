@@ -2,6 +2,16 @@
 #include "instructions.h"
 #include "cpu.h"
 
+Instruction inst_list[0xFF];
+
+void populate_inst_list(void)
+{
+    for (int i = 0x00; i < 0xFF + 1; i++)
+    {
+        inst_list[i] = get_instruction_from_opcode(i);
+    }
+}
+
 Instruction get_instruction_from_opcode(uint8_t opcode)
 {
     Instruction inst;
@@ -22,6 +32,8 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
     case 0xB1: inst = (Instruction) { 0xB1, "LDA", 2, 5 /*+ 1 if page crossed*/, IndirectY }; return inst;
 
     case 0xAA: inst = (Instruction) { 0xAA, "TAX", 1, 2, Implied }; return inst;
+
+    default: inst = (Instruction) { 0x00, "BRK", 1, 7, Implied }; return inst;
     }
 }
 
@@ -36,10 +48,11 @@ void inx(CPU *cpu)
     update_zero_and_negative_flags(cpu, cpu->reg_x);
 }
 
-void lda(CPU *cpu, uint8_t value)
+void lda(CPU *cpu, AddrMode mode)
 {
     cpu->program_counter++;
-    cpu->reg_a = value;
+    uint16_t addr = get_operand_addr(cpu, mode);
+    cpu->reg_a = read_mem(cpu, addr);
     update_zero_and_negative_flags(cpu, cpu->reg_a);
 }
 
