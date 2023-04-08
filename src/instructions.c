@@ -78,8 +78,8 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
         case Immediate: return cpu->program_counter;
 
         case ZeroPage: return read_mem(cpu, cpu->program_counter);
-        case ZeroPageX: return read_mem(cpu, cpu->program_counter + cpu->reg_x);
-        case ZeroPageY: return read_mem(cpu, cpu->program_counter + cpu->reg_y);
+        case ZeroPageX: return read_mem(cpu, cpu->program_counter) + cpu->reg_x;
+        case ZeroPageY: return read_mem(cpu, cpu->program_counter) + cpu->reg_y;
 
         case Absolute: return read_mem_u16(cpu, cpu->program_counter);
         case AbsoluteX: return read_mem_u16(cpu, cpu->program_counter) + cpu->reg_x;
@@ -93,6 +93,6 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             return read_mem_u16(cpu, base_u8 + cpu->reg_x);
         case IndirectY:
             base_u16 = read_mem_u16(cpu, cpu->program_counter);
-            return base_u16 + cpu->reg_y;
+            return read_mem_u16(cpu, base_u16) + cpu->reg_y;
     }
 }
