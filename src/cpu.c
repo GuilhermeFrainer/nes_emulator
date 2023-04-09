@@ -137,3 +137,15 @@ void run(CPU *cpu)
         }
     }
 }
+
+void displace(CPU *cpu, uint8_t original_pc_state, uint8_t displacement, Instruction inst)
+{
+    if (displacement != 0)
+    {
+        cpu->program_counter += displacement;
+    }
+    else
+    {
+        cpu->program_counter = original_pc_state + inst.bytes;
+    }
+}

@@ -79,7 +79,7 @@ void asl(CPU *cpu, AddrMode mode)
 
 uint8_t bcc(CPU *cpu)
 {
-    if ((cpu->status & CARRY_FLAG) != 0)
+    if ((cpu->status & CARRY_FLAG) == 0)
     {
         return read_mem(cpu, cpu->program_counter);    
     }
