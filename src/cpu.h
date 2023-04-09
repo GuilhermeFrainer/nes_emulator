@@ -30,6 +30,6 @@ void write_mem_u16(CPU *cpu, uint16_t value, uint16_t addr);
 void reset(CPU *cpu);
 void load(CPU *cpu, uint8_t program[], int program_length);
 void run(CPU *cpu);
-void displace(CPU *cpu, uint8_t original_pc_state, uint8_t displacement, Instruction inst);
+void displace(CPU *cpu, uint8_t displacement, Instruction inst);
 
 #endif

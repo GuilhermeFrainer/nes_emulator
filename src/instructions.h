@@ -36,6 +36,7 @@ extern Instruction inst_list[0xFF];
 
 // CPU flag bits
 #define NEGATIVE_FLAG 0b10000000
+#define OVERFLOW_FLAG 0b01000000
 #define ZERO_FLAG 0b00000010
 #define CARRY_FLAG 0b00000001
 
@@ -43,6 +44,7 @@ void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
 
 // Instructions
+void adc(CPU *cpu, AddrMode mode);
 void and(CPU *cpu, AddrMode mode);
 void asl_acc(CPU *cpu);
 void asl(CPU *cpu, AddrMode mode);

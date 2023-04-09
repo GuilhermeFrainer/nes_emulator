@@ -221,6 +221,45 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
 // Instructions
 
+void adc(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(mode);
+    uint8_t operand = read_mem(cpu, addr);
+    uint8_t old_carry = cpu->status & CARRY_FLAG;
+
+    uint8_t result = cpu->reg_a + old_carry + operand;
+
+    // Check if overflow flag must be set
+    // Check sources for a detailed explanation
+    uint8_t reg_a_sign_bit = cpu->reg_a >> 7;
+    uint8_t operand_sign_bit = operand >> 7;
+
+    // Check if carry flag must be set
+    uint8_t new_carry = old_carry + reg_a_sign_bit + operand_sign_bit;
+    if (new_carry >= 2)
+    {
+        cpu->status = cpu->status | CARRY_FLAG;
+        new_carry = 1;
+    }
+    else
+    {
+        cpu->status = cpu->status & ~CARRY_FLAG;
+    }
+    
+    // Check if overflow flag must be set
+    // Check sources for a detailed explanation
+    if (old_carry != new_carry)
+    {
+        cpu->status = cpu->status | OVERFLOW_FLAG;
+    }
+    else
+    {
+        cpu->status = cpu->status & ~OVERFLOW_FLAG;
+    }
+    cpu->reg_a = result;
+    update_zero_and_negative_flags(cpu, cpu->reg_a);
+}
+
 void and(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
@@ -290,6 +329,7 @@ void tax(CPU *cpu)
 }
 
 // Register functions
+
 void set_reg_a(CPU *cpu, uint8_t value)
 {
     cpu->reg_a = value;
