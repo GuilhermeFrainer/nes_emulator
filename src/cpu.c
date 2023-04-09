@@ -96,14 +96,7 @@ void run(CPU *cpu)
 
         case 0x90:
             uint8_t displacement = bcc(cpu);
-            if (displacement != 0)
-            {
-                cpu->program_counter += displacement;
-            }
-            else
-            {
-                cpu->program_counter = original_pc_state + inst.bytes;
-            }
+            displace(cpu, original_pc_state, displacement, inst);
             continue;
         
         case 0x00:

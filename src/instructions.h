@@ -47,6 +47,7 @@ void and(CPU *cpu, AddrMode mode);
 void asl_acc(CPU *cpu);
 void asl(CPU *cpu, AddrMode mode);
 uint8_t bcc(CPU *cpu);
+uint8_t bcs(CPU *cpu);
 void brk();
 void inx(CPU *cpu);
 void lda(CPU *cpu, AddrMode mode);
