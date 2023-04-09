@@ -69,6 +69,43 @@ void run(CPU *cpu)
 
         switch (opcode)
         {
+        case 0x29:
+        case 0x25:
+        case 0x35:
+        case 0x2D:
+        case 0x3D:
+        case 0x39:
+        case 0x21:
+        case 0x31:
+            and(cpu, inst.mode);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+        
+        case 0x0A:
+            asl_acc(cpu);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+
+        case 0x06:
+        case 0x16:
+        case 0x0E:
+        case 0x1E:
+            asl(cpu, inst.mode);
+            cpu->program_counter = original_pc_state + inst.bytes;
+            continue;
+
+        case 0x90:
+            uint8_t displacement = bcc(cpu);
+            if (displacement != 0)
+            {
+                cpu->program_counter += displacement;
+            }
+            else
+            {
+                cpu->program_counter = original_pc_state + inst.bytes;
+            }
+            continue;
+        
         case 0x00:
             brk();
             return;

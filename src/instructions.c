@@ -17,27 +17,79 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
     Instruction inst;
     switch (opcode)
     {
-    // opcode, mnemonic, bytes, cycles, mode             
-    case 0x00: inst = (Instruction) { 0x00, "BRK", 1, 7, Implied }; return inst;
+    // opcode, mnemonic, bytes, cycles, mode
+    case 0x29: inst = (Instruction) {0x29, "AND", 2, 2, Immediate}; return inst;
+    case 0x25: inst = (Instruction) {0x25, "AND", 2, 3, ZeroPage}; return inst;
+    case 0x35: inst = (Instruction) {0x35, "AND", 2, 4, ZeroPageX}; return inst;
+    case 0x2D: inst = (Instruction) {0x2D, "AND", 3, 4, Absolute}; return inst;
+    case 0x3D: inst = (Instruction) {0x3D, "AND", 3, 4, AbsoluteX}; return inst;
+    case 0x39: inst = (Instruction) {0x39, "AND", 3, 4, AbsoluteY}; return inst;
+    case 0x21: inst = (Instruction) {0x21, "AND", 2, 6, IndirectX}; return inst;
+    case 0x31: inst = (Instruction) {0x31, "AND", 2, 5, IndirectY}; return inst;
 
-    case 0xE8: inst = (Instruction) { 0xE8, "INX", 1, 2, Implied }; return inst;
+    case 0x0A: inst = (Instruction) {0x0A, "ASL", 1, 2, Implied}; return inst;
+    case 0x06: inst = (Instruction) {0x06, "ASL", 2, 5, ZeroPage}; return inst;
+    case 0x16: inst = (Instruction) {0x16, "ASL", 2, 6, ZeroPageX}; return inst;
+    case 0x0E: inst = (Instruction) {0x0E, "ASL", 3, 6, Absolute}; return inst;
+    case 0x1E: inst = (Instruction) {0x1E, "ASL", 3, 7, AbsoluteX}; return inst;
 
-    case 0xA9: inst = (Instruction) { 0xA9, "LDA", 2, 2, Immediate }; return inst;
-    case 0xA5: inst = (Instruction) { 0xA5, "LDA", 2, 3, ZeroPage }; return inst;
-    case 0xB5: inst = (Instruction) { 0xB5, "LDA", 2, 4, ZeroPageX }; return inst;
-    case 0xAD: inst = (Instruction) { 0xAD, "LDA", 3, 4, Absolute }; return inst;
-    case 0xBD: inst = (Instruction) { 0xBD, "LDA", 3, 4 /*+ 1 if page crossed*/, AbsoluteX }; return inst;
-    case 0xB9: inst = (Instruction) { 0xB9, "LDA", 3, 4 /*+ 1 if page crossed*/, AbsoluteY }; return inst;
-    case 0xA1: inst = (Instruction) { 0xA1, "LDA", 2, 6, IndirectX }; return inst;
-    case 0xB1: inst = (Instruction) { 0xB1, "LDA", 2, 5 /*+ 1 if page crossed*/, IndirectY }; return inst;
+    case 0x90: inst = (Instruction) {0x90, "BCC", 2, 2, Implied}; return inst;
 
-    case 0xAA: inst = (Instruction) { 0xAA, "TAX", 1, 2, Implied }; return inst;
+    case 0x00: inst = (Instruction) {0x00, "BRK", 1, 7, Implied}; return inst;
 
-    default: inst = (Instruction) { 0x00, "BRK", 1, 7, Implied }; return inst;
+    case 0xE8: inst = (Instruction) {0xE8, "INX", 1, 2, Implied}; return inst;
+
+    case 0xA9: inst = (Instruction) {0xA9, "LDA", 2, 2, Immediate}; return inst;
+    case 0xA5: inst = (Instruction) {0xA5, "LDA", 2, 3, ZeroPage}; return inst;
+    case 0xB5: inst = (Instruction) {0xB5, "LDA", 2, 4, ZeroPageX}; return inst;
+    case 0xAD: inst = (Instruction) {0xAD, "LDA", 3, 4, Absolute}; return inst;
+    case 0xBD: inst = (Instruction) {0xBD, "LDA", 3, 4, AbsoluteX}; return inst;
+    case 0xB9: inst = (Instruction) {0xB9, "LDA", 3, 4, AbsoluteY}; return inst;
+    case 0xA1: inst = (Instruction) {0xA1, "LDA", 2, 6, IndirectX}; return inst;
+    case 0xB1: inst = (Instruction) {0xB1, "LDA", 2, 5, IndirectY}; return inst;
+
+    case 0xAA: inst = (Instruction) {0xAA, "TAX", 1, 2, Implied}; return inst;
+
+    default: inst = (Instruction) {0x00, "BRK", 1, 7, Implied}; return inst;
     }
 }
 
-void brk()
+// Instructions
+
+void and(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    set_reg_a(cpu, cpu->reg_a & operand);
+}
+
+void asl_acc(CPU *cpu)
+{
+    update_carry_flag(cpu, cpu->reg_a);
+    set_reg_a(cpu, cpu->reg_a << 1);
+}
+
+void asl(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t value = read_mem(cpu, addr);
+    write_mem(cpu, value, addr);
+    update_carry_flag(cpu, value);
+}
+
+uint8_t bcc(CPU *cpu)
+{
+    if ((cpu->status & CARRY_FLAG) != 0)
+    {
+        return read_mem(cpu, cpu->program_counter);    
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void brk(void)
 {
     return;
 }
@@ -51,15 +103,35 @@ void inx(CPU *cpu)
 void lda(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    cpu->reg_a = read_mem(cpu, addr);
-    update_zero_and_negative_flags(cpu, cpu->reg_a);
+    uint8_t value = read_mem(cpu, addr);
+    set_reg_a(cpu, value);
 }
 
 void tax(CPU *cpu)
 {
-    cpu->reg_x = cpu->reg_a;
-    update_zero_and_negative_flags(cpu, cpu->reg_x);
+    set_reg_x(cpu, cpu->reg_a);
 }
+
+// Register functions
+void set_reg_a(CPU *cpu, uint8_t value)
+{
+    cpu->reg_a = value;
+    update_zero_and_negative_flags(cpu, value);
+}
+
+void set_reg_x(CPU *cpu, uint8_t value)
+{
+    cpu->reg_x = value;
+    update_zero_and_negative_flags(cpu, value);
+}
+
+void set_reg_y(CPU *cpu, uint8_t value)
+{
+    cpu->reg_y = value;
+    update_zero_and_negative_flags(cpu, value);
+}
+
+// Utility functions
 
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
 {
@@ -80,6 +152,18 @@ void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
     else
     {
         cpu->status = cpu->status & ~NEGATIVE_FLAG;
+    }
+}
+
+void update_carry_flag(CPU *cpu, uint8_t value)
+{
+    if ((value >> 7) == 1)
+    {
+        cpu->status = cpu->status | CARRY_FLAG;
+    }
+    else
+    {
+        cpu->status = cpu->status & ~CARRY_FLAG;
     }
 }
 
