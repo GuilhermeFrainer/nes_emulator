@@ -9,12 +9,14 @@ void test_get_instruction_from_opcode(void);
 void test_populate_inst_list(void);
 void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
+void test_instructions(void);
 
 int main(void)
 {
     test_update_zero_and_negative_flags();
     test_get_operand_addr();
     test_populate_inst_list();
+    test_instructions();
     end_tests();
 }
 
@@ -85,4 +87,15 @@ void test_get_operand_addr(void)
 
     write_mem_u16(&cpu, 0xBAAB, 0xBC);
     assert_eq(get_operand_addr(&cpu, IndirectY), 0xBAAB + cpu.reg_y);
+}
+
+void test_instructions(void)
+{
+    CPU cpu = new_cpu();
+    populate_inst_list();
+
+    cpu.reg_a = 0x80;
+    write_mem(&cpu, 0x80, 0);
+    adc(&cpu, Immediate);
+    assert_eq(cpu.status, CARRY_FLAG | OVERFLOW_FLAG);
 }
