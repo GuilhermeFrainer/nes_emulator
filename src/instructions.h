@@ -1,10 +1,11 @@
 #ifndef INSTRUCTIONS_H
 #define INSTRUCTIONS_H
 
-#include "cpu.h"
 #include <stdint.h>
 
-typedef enum
+typedef struct CPU CPU;
+
+typedef enum AddrMode
 {
     Immediate,
 
@@ -23,7 +24,7 @@ typedef enum
     Implied
 } AddrMode;
 
-typedef struct
+typedef struct Instruction
 {
     uint8_t opcode;
     char mnemonic[3];

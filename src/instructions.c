@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "instructions.h"
 #include "cpu.h"
 
@@ -223,7 +222,7 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
 void adc(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(mode);
+    uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = read_mem(cpu, addr);
     uint8_t old_carry = cpu->status & CARRY_FLAG;
 

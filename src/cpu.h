@@ -1,10 +1,11 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include "instructions.h"
 #include <stdint.h>
 
-typedef struct
+typedef struct Instruction Instruction;
+
+typedef struct CPU
 {
     uint8_t status;
     uint16_t program_counter;
