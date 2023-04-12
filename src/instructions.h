@@ -2,6 +2,7 @@
 #define INSTRUCTIONS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct CPU CPU;
 
@@ -36,10 +37,12 @@ typedef struct Instruction
 extern Instruction inst_list[0xFF];
 
 // CPU flag bits
-#define NEGATIVE_FLAG 0b10000000
-#define OVERFLOW_FLAG 0b01000000
-#define ZERO_FLAG 0b00000010
-#define CARRY_FLAG 0b00000001
+#define NEGATIVE_FLAG  0b10000000
+#define OVERFLOW_FLAG  0b01000000
+#define DECIMAL_FLAG   0b00001000
+#define INTERRUPT_FLAG 0b00000100
+#define ZERO_FLAG      0b00000010
+#define CARRY_FLAG     0b00000001
 
 void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
@@ -53,22 +56,22 @@ void asl_acc(CPU *cpu);
 void asl(CPU *cpu, AddrMode mode);
 
 // Branch instructions part 1
-uint8_t bcc(CPU *cpu);
-uint8_t bcs(CPU *cpu);
-uint8_t beq(CPU *cpu);
+void bcc(CPU *cpu);
+void bcs(CPU *cpu);
+void beq(CPU *cpu);
 
 void bit(CPU *cpu, AddrMode mode);
 
 // Branch instructions part 2
-uint8_t bmi(CPU *cpu);
-uint8_t bne(CPU *cpu);
-uint8_t bpl(CPU *cpu);
+void bmi(CPU *cpu);
+void bne(CPU *cpu);
+void bpl(CPU *cpu);
 
 void brk();
 
 // Branch instructions part 3
-uint8_t bvc(CPU *cpu);
-uint8_t bvs(CPU *cpu);
+void bvc(CPU *cpu);
+void bvs(CPU *cpu);
 
 // Clear instructions
 void clc(CPU *cpu);
@@ -153,5 +156,8 @@ void set_reg_y(CPU *cpu, uint8_t value);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
+void set_flag(CPU *cpu, uint8_t flag);
+void unset_flag(CPU *cpu, uint8_t flag);
+bool is_set(CPU *cpu, uint8_t flag);
 
 #endif

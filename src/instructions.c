@@ -237,23 +237,23 @@ void adc(CPU *cpu, AddrMode mode)
     uint8_t new_carry = old_carry + reg_a_sign_bit + operand_sign_bit;
     if (new_carry >= 2)
     {
-        cpu->status = cpu->status | CARRY_FLAG;
+        set_flag(cpu, CARRY_FLAG);
         new_carry = 1;
     }
     else
     {
-        cpu->status = cpu->status & ~CARRY_FLAG;
+        unset_flag(cpu, CARRY_FLAG);
     }
     
     // Check if overflow flag must be set
     // Check sources for a detailed explanation
     if (old_carry != new_carry)
     {
-        cpu->status = cpu->status | OVERFLOW_FLAG;
+        set_flag(cpu, OVERFLOW_FLAG);
     }
     else
     {
-        cpu->status = cpu->status & ~OVERFLOW_FLAG;
+        unset_flag(cpu, OVERFLOW_FLAG);
     }
     cpu->reg_a = result;
     update_zero_and_negative_flags(cpu, cpu->reg_a);
@@ -280,28 +280,57 @@ void asl(CPU *cpu, AddrMode mode)
     update_carry_flag(cpu, value);
 }
 
-uint8_t bcc(CPU *cpu)
+// Branch instructions part 1
+
+void bcc(CPU *cpu)
 {
-    if ((cpu->status & CARRY_FLAG) == 0)
-    {
-        return read_mem(cpu, cpu->program_counter);    
-    }
-    else
-    {
-        return 0;
-    }
+    cpu->program_counter += (!is_set(cpu, CARRY_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
 }
 
-uint8_t bcs(CPU *cpu)
+void bcs(CPU *cpu)
 {
-    if ((cpu->status & CARRY_FLAG) != 0)
-    {
-        return read_mem(cpu, cpu->program_counter);
-    }
-    else
-    {
-        return 0;
-    }
+    cpu->program_counter += (is_set(cpu, CARRY_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+void beq(CPU *cpu)
+{
+    cpu->program_counter += (is_set(cpu, ZERO_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+void bit(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+
+    cpu->status = ((cpu->reg_a & operand) == 0) ? cpu->status | ZERO_FLAG : cpu->status & ~ZERO_FLAG;
+    
+    // Set V flag to operand 6th bit
+    cpu->status = cpu->status | (OVERFLOW_FLAG & cpu->status);
+    // Set N flag to operand 7th bit
+    cpu->status = cpu->status | (NEGATIVE_FLAG & cpu->status);
+}
+
+// Branch instructions part 2
+
+void bmi(CPU *cpu)
+{
+    cpu->program_counter += (is_set(cpu, NEGATIVE_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+void bne(CPU *cpu)
+{
+    cpu->program_counter += (!is_set(cpu, ZERO_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+void bpl(CPU *cpu)
+{
+    cpu->program_counter += (!is_set(cpu, NEGATIVE_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
 }
 
 void brk(void)
@@ -309,10 +338,157 @@ void brk(void)
     return;
 }
 
+// Branch instructions part 3
+
+void bvc(CPU *cpu)
+{
+    cpu->program_counter += (!is_set(cpu, OVERFLOW_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+void bvs(CPU *cpu)
+{
+    cpu->program_counter += (is_set(cpu, OVERFLOW_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
+
+// Clear flag instructions
+
+void clc(CPU *cpu)
+{
+    unset_flag(cpu, CARRY_FLAG);
+}
+
+void cld(CPU *cpu)
+{
+    unset_flag(cpu, DECIMAL_FLAG);
+}
+
+void cli(CPU *cpu)
+{
+    unset_flag(cpu, INTERRUPT_FLAG);
+}
+
+void clv(CPU *cpu)
+{
+    unset_flag(cpu, OVERFLOW_FLAG);
+}
+
+// Compare instructions
+
+void cmp(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    if (cpu->reg_a >= operand)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    uint8_t result = cpu->reg_a - operand;
+    update_zero_and_negative_flags(cpu, result);
+}
+
+void cpx(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    if (cpu->reg_x >= operand)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    uint8_t result = cpu->reg_x - operand;
+    update_zero_and_negative_flags(cpu, result);
+}
+
+void cpy(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    if (cpu->reg_y >= operand)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    uint8_t result = cpu->reg_y - operand;
+    update_zero_and_negative_flags(cpu, result);
+}
+
+// Decrement instructions
+
+void dec(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    operand--;
+    write_mem(cpu, operand, addr);
+    update_zero_and_negative_flags(cpu, operand);
+}
+
+void dex(CPU *cpu)
+{
+    cpu->reg_x--;
+    update_zero_and_negative_flags(cpu, cpu->reg_x);
+}
+
+void dey(CPU *cpu)
+{
+    cpu->reg_y--;
+    update_zero_and_negative_flags(cpu, cpu->reg_y);
+}
+
+void eor(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    cpu->reg_a ^= operand;
+    update_zero_and_negative_flags(cpu, cpu->reg_a); 
+}
+
+// Increment instruction
+
+void inc(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    operand++;
+    write_mem(cpu, operand, addr);
+    update_zero_and_negative_flags(cpu, operand);
+}
+
 void inx(CPU *cpu)
 {
     cpu->reg_x++;
     update_zero_and_negative_flags(cpu, cpu->reg_x);
+}
+
+void iny(CPU *cpu)
+{
+    cpu->reg_y++;
+    update_zero_and_negative_flags(cpu, cpu->reg_y);
+}
+
+// Jump instructions
+
+void jmp(CPU *cpu, AddrMode mode)
+{
+    // Not implemented: page end bug
+    cpu->program_counter = get_operand_addr(cpu, mode);
+}
+
+void jst(CPU *cpu)
+{
+    
 }
 
 void lda(CPU *cpu, AddrMode mode)
@@ -354,20 +530,20 @@ void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
     // Update zero flag
     if (result == 0)
     {
-        cpu->status = cpu->status | ZERO_FLAG;
+        set_flag(cpu, ZERO_FLAG);
     }
     else
     {
-        cpu->status = cpu->status & ~ZERO_FLAG;
+        unset_flag(cpu, ZERO_FLAG);
     }
     // Update negative flag
     if ((result & 0b10000000) != 0)
     {
-        cpu->status = cpu->status | NEGATIVE_FLAG;
+        set_flag(cpu, NEGATIVE_FLAG);
     }
     else
     {
-        cpu->status = cpu->status & ~NEGATIVE_FLAG;
+        unset_flag(cpu, NEGATIVE_FLAG);
     }
 }
 
@@ -375,11 +551,11 @@ void update_carry_flag(CPU *cpu, uint8_t value)
 {
     if ((value >> 7) == 1)
     {
-        cpu->status = cpu->status | CARRY_FLAG;
+        set_flag(cpu, CARRY_FLAG);
     }
     else
     {
-        cpu->status = cpu->status & ~CARRY_FLAG;
+        unset_flag(cpu, CARRY_FLAG);
     }
 }
 
@@ -407,4 +583,19 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             base_u16 = read_mem_u16(cpu, cpu->program_counter);
             return read_mem_u16(cpu, base_u16) + cpu->reg_y;
     }
+}
+
+void set_flag(CPU *cpu, uint8_t flag)
+{
+    cpu->status |= flag;
+}
+
+void unset_flag(CPU *cpu, uint8_t flag)
+{
+    cpu->status &= ~flag;
+}
+
+bool is_set(CPU *cpu, uint8_t flag)
+{
+    return ((cpu->status & flag) != 0) ? true : false;
 }

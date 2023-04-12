@@ -6,6 +6,7 @@ CPU new_cpu(void)
     CPU cpu;
     cpu.status = 0;
     cpu.program_counter = 0;
+    cpu.stack_pointer = 0;
     cpu.reg_a = 0;
     cpu.reg_x = 0;
     cpu.reg_y = 0;
@@ -95,8 +96,6 @@ void run(CPU *cpu)
             continue;
 
         case 0x90:
-            uint8_t displacement = bcc(cpu);
-            displace(cpu, displacement, inst);
             continue;
         
         case 0x00:

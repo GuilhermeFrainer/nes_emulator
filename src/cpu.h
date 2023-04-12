@@ -9,6 +9,7 @@ typedef struct CPU
 {
     uint8_t status;
     uint16_t program_counter;
+    uint8_t stack_pointer;
     uint8_t reg_a;
     uint8_t reg_x;
     uint8_t reg_y;
