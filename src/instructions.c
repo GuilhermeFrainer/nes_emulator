@@ -599,3 +599,42 @@ bool is_set(CPU *cpu, uint8_t flag)
 {
     return ((cpu->status & flag) != 0) ? true : false;
 }
+
+// Stack functions
+
+uint16_t get_stack_addr(CPU *cpu)
+{
+    uint16_t stack_pointer = (uint16_t) cpu->stack_pointer;
+    return STACK | stack_pointer;
+}
+
+void stack_push(CPU *cpu, uint8_t value)
+{
+    uint16_t addr = get_stack_addr(cpu);
+    write_mem(cpu, value, addr);
+    cpu->stack_pointer--;
+}
+
+void stack_push_u16(CPU *cpu, uint16_t value)
+{
+    uint8_t high = value >> 8;
+    uint8_t low = value & 0xFF;
+    stack_push(cpu, high);
+    stack_push(cpu, low);
+}
+
+uint8_t stack_pull(CPU *cpu)
+{
+    cpu->stack_pointer++;
+    uint16_t addr = get_stack_addr(cpu);
+    uint8_t value = read_mem(cpu, addr);
+    return value;
+}
+
+uint16_t stack_pull_u16(CPU *cpu)
+{
+    uint16_t addr = get_stack_addr(cpu);
+    uint16_t low = (uint16_t) stack_pull(cpu);
+    uint16_t high = (uint16_t) stack_pull(cpu) << 8;
+    return high | low;
+}

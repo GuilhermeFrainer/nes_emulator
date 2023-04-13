@@ -2,6 +2,8 @@
 #include "../src/instructions.h"
 #include "../src/cpu.h"
 
+#include <stdint.h>
+
 int successful_tests = 0;
 int failed_tests = 0;
 
@@ -12,6 +14,8 @@ void test_get_operand_addr(void);
 void test_instructions(void);
 void test_set_unset_flag(void);
 void test_is_set(void);
+void test_get_stack_addr(void);
+void test_stack(void);
 
 int main(void)
 {
@@ -22,6 +26,8 @@ int main(void)
     test_instructions();
     test_set_unset_flag();
     test_is_set();
+    test_get_stack_addr();
+    test_stack();
     end_tests();
 }
 
@@ -125,4 +131,19 @@ void test_is_set(void)
     set_flag(&cpu, NEGATIVE_FLAG);
     assert_eq(is_set(&cpu, NEGATIVE_FLAG), true);
     assert_eq(is_set(&cpu, ZERO_FLAG), false);
+}
+
+void test_get_stack_addr(void)
+{
+    CPU cpu = new_cpu();
+    cpu.stack_pointer = 0xAA;
+    assert_eq(get_stack_addr(&cpu), 0x01AA);
+}
+
+void test_stack(void)
+{
+    CPU cpu = new_cpu();
+    cpu.stack_pointer = 0xFF;
+    stack_push_u16(&cpu, 0xAABB);
+    assert_eq(stack_pull_u16(&cpu), 0xAABB);
 }

@@ -44,6 +44,8 @@ extern Instruction inst_list[0xFF];
 #define ZERO_FLAG      0b00000010
 #define CARRY_FLAG     0b00000001
 
+#define STACK 0x0100
+
 void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
 
@@ -159,5 +161,12 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
 void set_flag(CPU *cpu, uint8_t flag);
 void unset_flag(CPU *cpu, uint8_t flag);
 bool is_set(CPU *cpu, uint8_t flag);
+
+// Stack functions
+uint16_t get_stack_addr(CPU *cpu);
+void stack_push(CPU *cpu, uint8_t value);
+void stack_push_u16(CPU *cpu, uint16_t value);
+uint8_t stack_pull(CPU *cpu);
+uint16_t stack_pull_u16(CPU *cpu);
 
 #endif
