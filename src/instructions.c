@@ -486,16 +486,182 @@ void jmp(CPU *cpu, AddrMode mode)
     cpu->program_counter = get_operand_addr(cpu, mode);
 }
 
-void jst(CPU *cpu)
+void jsr(CPU *cpu)
 {
-    
+    stack_push_u16(cpu, cpu->program_counter + 2 - 1);
+    uint16_t addr = read_mem_u16(cpu, cpu->program_counter);
+    cpu->program_counter = addr;
 }
+
+// Load instructions
 
 void lda(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t value = read_mem(cpu, addr);
     set_reg_a(cpu, value);
+}
+
+void ldx(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    set_reg_x(cpu, operand);
+}
+
+void ldy(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    set_reg_y(cpu, operand);
+}
+
+void lsr_acc(CPU *cpu)
+{
+    int lsb = cpu->reg_a & 1;
+    if ((cpu->reg_a & 1) != 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    set_reg_a(cpu, cpu->reg_a >> 1);
+}
+
+void lsr(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    if ((operand & 1) != 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    write_mem(cpu, operand >> 1, addr);
+    update_zero_and_negative_flags(cpu, operand >> 1);
+}
+
+void ora(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    set_reg_a(cpu, cpu->reg_a | operand);
+}
+
+// Push instructions
+
+void pha(CPU *cpu)
+{
+    stack_push(cpu, cpu->reg_a);
+}
+
+void php(CPU *cpu)
+{
+    stack_push(cpu, cpu->status);
+}
+
+// Pull instructions
+
+void pla(CPU *cpu)
+{
+    uint8_t operand = stack_pull(cpu);
+    set_reg_a(cpu, operand);
+}
+
+void plp(CPU *cpu)
+{
+    cpu->status = stack_pull(cpu);
+}
+
+// Rotate instructions
+
+void rol_acc(CPU *cpu)
+{
+    uint8_t old_acc = cpu->reg_a;
+    cpu->reg_a <<= 1;
+    if (is_set(cpu, CARRY_FLAG))
+    {
+        cpu->reg_a |= 0x01;
+    }
+    
+    if ((old_acc & 0x80) != 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+}
+
+void rol(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    uint8_t new_value = operand << 1;
+    if (is_set(cpu, CARRY_FLAG))
+    {
+        new_value |= 0x01;
+    }
+    if (operand & 0x80)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    write_mem(cpu, new_value, addr);
+}
+
+void ror_acc(CPU *cpu)
+{
+    uint8_t old_acc = cpu->reg_a;
+    cpu->reg_a >>= 1;
+    if (is_set(cpu, CARRY_FLAG))
+    {
+        cpu->reg_a |= 0x80;
+    }
+    if ((old_acc & 0x01) != 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+}
+
+void ror(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    uint8_t new_value = operand >> 1;
+    if (is_set(cpu, CARRY_FLAG))
+    {
+        new_value |= 0x80;
+    }
+    if ((operand & 0x01) != 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    write_mem(cpu, new_value, addr);
+}
+
+// Return instructions
+
+void rti(CPU *cpu)
+{
+    
 }
 
 void tax(CPU *cpu)

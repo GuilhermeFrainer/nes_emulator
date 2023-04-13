@@ -107,8 +107,9 @@ void lda(CPU *cpu, AddrMode mode);
 void ldx(CPU *cpu, AddrMode mode);
 void ldy(CPU *cpu, AddrMode mode);
 
+void lsr_acc(CPU *cpu);
 void lsr(CPU *cpu, AddrMode mode);
-void nop();
+//void nop(void); // Not implemented since it does nothing
 void ora(CPU *cpu, AddrMode mode);
 
 // Push instructions
@@ -120,7 +121,9 @@ void pla(CPU *cpu);
 void plp(CPU *cpu);
 
 // Rotate instructions
+void rol_acc(CPU *cpu);
 void rol(CPU *cpu, AddrMode mode);
+void ror_acc(CPU *cpu);
 void ror(CPU *cpu, AddrMode mode);
 
 // Return instructions

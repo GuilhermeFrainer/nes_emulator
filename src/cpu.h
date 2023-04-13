@@ -18,9 +18,17 @@ typedef struct CPU
 
 /* 
     STATUS REGISTER BITS
+    7  bit  0
+    ---- ----
     NVss DIZC
-    Negative, overflow, ss -> no effect
-    Decimal, Interrupt disable, Zero, Carry
+    |||| ||||
+    |||| |||+- Carry
+    |||| ||+-- Zero
+    |||| |+--- Interrupt Disable
+    |||| +---- Decimal
+    ||++------ No CPU effect, see: the B flag
+    |+-------- Overflow
+    +--------- Negative
     Source: https://www.nesdev.org/wiki/Status_flags
 */
 
