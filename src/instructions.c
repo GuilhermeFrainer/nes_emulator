@@ -224,39 +224,7 @@ void adc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = read_mem(cpu, addr);
-    uint8_t old_carry = cpu->status & CARRY_FLAG;
-
-    uint8_t result = cpu->reg_a + old_carry + operand;
-
-    // Check if overflow flag must be set
-    // Check sources for a detailed explanation
-    uint8_t reg_a_sign_bit = cpu->reg_a >> 7;
-    uint8_t operand_sign_bit = operand >> 7;
-
-    // Check if carry flag must be set
-    uint8_t new_carry = old_carry + reg_a_sign_bit + operand_sign_bit;
-    if (new_carry >= 2)
-    {
-        set_flag(cpu, CARRY_FLAG);
-        new_carry = 1;
-    }
-    else
-    {
-        unset_flag(cpu, CARRY_FLAG);
-    }
-    
-    // Check if overflow flag must be set
-    // Check sources for a detailed explanation
-    if (old_carry != new_carry)
-    {
-        set_flag(cpu, OVERFLOW_FLAG);
-    }
-    else
-    {
-        unset_flag(cpu, OVERFLOW_FLAG);
-    }
-    cpu->reg_a = result;
-    update_zero_and_negative_flags(cpu, cpu->reg_a);
+    add_with_carry(cpu, operand);
 }
 
 void and(CPU *cpu, AddrMode mode)
@@ -333,7 +301,7 @@ void bpl(CPU *cpu)
     cpu->program_counter++;
 }
 
-void brk(void)
+void brk(CPU *cpu)
 {
     return;
 }
@@ -661,12 +629,93 @@ void ror(CPU *cpu, AddrMode mode)
 
 void rti(CPU *cpu)
 {
-    
+    uint8_t flags = stack_pull(cpu);
+    uint16_t program_counter = stack_pull_u16(cpu);
+    cpu->status = flags;
+    cpu->program_counter = program_counter;
 }
+
+void rts(CPU *cpu)
+{
+    uint16_t program_counter = stack_pull_u16(cpu);
+    cpu->program_counter = program_counter + 1;
+}
+
+void sbc(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = read_mem(cpu, addr);
+    operand = ~operand + 1;
+    add_with_carry(cpu, operand);
+}
+
+// Set flag instructions
+
+void sec(CPU *cpu)
+{
+    set_flag(cpu, CARRY_FLAG);
+}
+
+void sed(CPU *cpu)
+{
+    set_flag(cpu, DECIMAL_FLAG);
+}
+
+void sei(CPU *cpu)
+{
+    set_flag(cpu, INTERRUPT_FLAG);
+}
+
+// Store instructions
+
+void sta(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    write_mem(cpu, cpu->reg_a, addr);
+}
+
+void stx(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    write_mem(cpu, cpu->reg_x, addr);
+}
+
+void sty(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    write_mem(cpu, cpu->reg_y, addr);
+}
+
+// Transfer instructions
 
 void tax(CPU *cpu)
 {
     set_reg_x(cpu, cpu->reg_a);
+}
+
+void tay(CPU *cpu)
+{
+    set_reg_y(cpu, cpu->reg_a);
+}
+
+void tsx(CPU *cpu)
+{
+    set_reg_x(cpu, cpu->stack_pointer);
+}
+
+void txa(CPU *cpu)
+{
+    set_reg_a(cpu, cpu->reg_x);
+}
+
+void txs(CPU *cpu)
+{
+    cpu->stack_pointer = cpu->reg_x;
+}
+
+void tya(CPU *cpu)
+{
+    set_reg_a(cpu, cpu->reg_y);
 }
 
 // Register functions
@@ -749,6 +798,42 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             base_u16 = read_mem_u16(cpu, cpu->program_counter);
             return read_mem_u16(cpu, base_u16) + cpu->reg_y;
     }
+}
+
+// Made to implement both ADC and SBC more easily
+void add_with_carry(CPU *cpu, uint8_t operand)
+{
+    uint8_t old_carry = cpu->status & CARRY_FLAG;
+    uint8_t result = cpu->reg_a + old_carry + operand;
+
+    // Check if overflow flag must be set
+    // Check sources for a detailed explanation
+    uint8_t reg_a_sign_bit = cpu->reg_a >> 7;
+    uint8_t operand_sign_bit = operand >> 7;
+
+    // Check if carry flag must be set
+    uint8_t new_carry = old_carry + reg_a_sign_bit + operand_sign_bit;
+    if (new_carry >= 2)
+    {
+        set_flag(cpu, CARRY_FLAG);
+        new_carry = 1;
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
+    
+    // Check if overflow flag must be set
+    // Check sources for a detailed explanation
+    if (old_carry != new_carry)
+    {
+        set_flag(cpu, OVERFLOW_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, OVERFLOW_FLAG);
+    }
+    set_reg_a(cpu, result);
 }
 
 void set_flag(CPU *cpu, uint8_t flag)

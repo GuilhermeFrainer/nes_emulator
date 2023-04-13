@@ -99,7 +99,7 @@ void run(CPU *cpu)
             continue;
         
         case 0x00:
-            brk();
+            brk(cpu);
             return;
 
         case 0xE8:

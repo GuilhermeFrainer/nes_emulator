@@ -39,6 +39,8 @@ extern Instruction inst_list[0xFF];
 // CPU flag bits
 #define NEGATIVE_FLAG  0b10000000
 #define OVERFLOW_FLAG  0b01000000
+#define BREAK_FLAG_1   0b00100000
+#define BREAK_FLAG_0   0b00010000
 #define DECIMAL_FLAG   0b00001000
 #define INTERRUPT_FLAG 0b00000100
 #define ZERO_FLAG      0b00000010
@@ -69,7 +71,7 @@ void bmi(CPU *cpu);
 void bne(CPU *cpu);
 void bpl(CPU *cpu);
 
-void brk();
+void brk(CPU *cpu);
 
 // Branch instructions part 3
 void bvc(CPU *cpu);
@@ -161,6 +163,7 @@ void set_reg_y(CPU *cpu, uint8_t value);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
+void add_with_carry(CPU *cpu, uint8_t operand);
 void set_flag(CPU *cpu, uint8_t flag);
 void unset_flag(CPU *cpu, uint8_t flag);
 bool is_set(CPU *cpu, uint8_t flag);
