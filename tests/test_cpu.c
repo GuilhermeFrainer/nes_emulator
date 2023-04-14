@@ -8,6 +8,10 @@ void test_read_and_write_mem(void);
 void test_reset(void);
 void test_load(void);
 void test_run(void);
+void test_set_unset_flag(void);
+void test_is_set(void);
+void test_get_stack_addr(void);
+void test_stack(void);
 
 int successful_tests = 0;
 int failed_tests = 0;
@@ -19,6 +23,10 @@ int main(void)
     test_reset();
     test_load();
     test_run();
+    test_set_unset_flag();
+    test_is_set();
+    test_get_stack_addr();
+    test_stack();
     end_tests();
 }
 
@@ -83,4 +91,41 @@ void test_run(void)
     run(&cpu);
     assert_eq(cpu.reg_a, 0xC0);
     assert_eq(cpu.reg_x, 0xC1);
+}
+
+void test_set_unset_flag(void)
+{
+    CPU cpu = new_cpu();
+    set_flag(&cpu, NEGATIVE_FLAG);
+
+    assert_eq(cpu.status, 0b10000000);
+
+    set_flag(&cpu, CARRY_FLAG);
+    assert_eq(cpu.status, 0b10000001);
+
+    unset_flag(&cpu, NEGATIVE_FLAG);
+    assert_eq(cpu.status, 0b00000001);
+}
+
+void test_is_set(void)
+{
+    CPU cpu = new_cpu();
+    set_flag(&cpu, NEGATIVE_FLAG);
+    assert_eq(is_set(&cpu, NEGATIVE_FLAG), true);
+    assert_eq(is_set(&cpu, ZERO_FLAG), false);
+}
+
+void test_get_stack_addr(void)
+{
+    CPU cpu = new_cpu();
+    cpu.stack_pointer = 0xAA;
+    assert_eq(get_stack_addr(&cpu), 0x01AA);
+}
+
+void test_stack(void)
+{
+    CPU cpu = new_cpu();
+    cpu.stack_pointer = 0xFF;
+    stack_push_u16(&cpu, 0xAABB);
+    assert_eq(stack_pull_u16(&cpu), 0xAABB);
 }

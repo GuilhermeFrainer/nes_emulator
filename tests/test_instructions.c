@@ -12,10 +12,6 @@ void test_populate_inst_list(void);
 void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
 void test_instructions(void);
-void test_set_unset_flag(void);
-void test_is_set(void);
-void test_get_stack_addr(void);
-void test_stack(void);
 
 int main(void)
 {
@@ -24,10 +20,6 @@ int main(void)
     test_update_zero_and_negative_flags();
     test_get_operand_addr();
     test_instructions();
-    test_set_unset_flag();
-    test_is_set();
-    test_get_stack_addr();
-    test_stack();
     end_tests();
 }
 
@@ -109,41 +101,4 @@ void test_instructions(void)
     write_mem(&cpu, 0x80, 0);
     adc(&cpu, Immediate);
     assert_eq(cpu.status, CARRY_FLAG | OVERFLOW_FLAG);
-}
-
-void test_set_unset_flag(void)
-{
-    CPU cpu = new_cpu();
-    set_flag(&cpu, NEGATIVE_FLAG);
-
-    assert_eq(cpu.status, 0b10000000);
-
-    set_flag(&cpu, CARRY_FLAG);
-    assert_eq(cpu.status, 0b10000001);
-
-    unset_flag(&cpu, NEGATIVE_FLAG);
-    assert_eq(cpu.status, 0b00000001);
-}
-
-void test_is_set(void)
-{
-    CPU cpu = new_cpu();
-    set_flag(&cpu, NEGATIVE_FLAG);
-    assert_eq(is_set(&cpu, NEGATIVE_FLAG), true);
-    assert_eq(is_set(&cpu, ZERO_FLAG), false);
-}
-
-void test_get_stack_addr(void)
-{
-    CPU cpu = new_cpu();
-    cpu.stack_pointer = 0xAA;
-    assert_eq(get_stack_addr(&cpu), 0x01AA);
-}
-
-void test_stack(void)
-{
-    CPU cpu = new_cpu();
-    cpu.stack_pointer = 0xFF;
-    stack_push_u16(&cpu, 0xAABB);
-    assert_eq(stack_pull_u16(&cpu), 0xAABB);
 }
