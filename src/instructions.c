@@ -718,25 +718,7 @@ void tya(CPU *cpu)
     set_reg_a(cpu, cpu->reg_y);
 }
 
-// Register functions
-
-void set_reg_a(CPU *cpu, uint8_t value)
-{
-    cpu->reg_a = value;
-    update_zero_and_negative_flags(cpu, value);
-}
-
-void set_reg_x(CPU *cpu, uint8_t value)
-{
-    cpu->reg_x = value;
-    update_zero_and_negative_flags(cpu, value);
-}
-
-void set_reg_y(CPU *cpu, uint8_t value)
-{
-    cpu->reg_y = value;
-    update_zero_and_negative_flags(cpu, value);
-}
+// End instructions
 
 // Utility functions
 
@@ -834,58 +816,4 @@ void add_with_carry(CPU *cpu, uint8_t operand)
         unset_flag(cpu, OVERFLOW_FLAG);
     }
     set_reg_a(cpu, result);
-}
-
-void set_flag(CPU *cpu, uint8_t flag)
-{
-    cpu->status |= flag;
-}
-
-void unset_flag(CPU *cpu, uint8_t flag)
-{
-    cpu->status &= ~flag;
-}
-
-bool is_set(CPU *cpu, uint8_t flag)
-{
-    return ((cpu->status & flag) != 0) ? true : false;
-}
-
-// Stack functions
-
-uint16_t get_stack_addr(CPU *cpu)
-{
-    uint16_t stack_pointer = (uint16_t) cpu->stack_pointer;
-    return STACK | stack_pointer;
-}
-
-void stack_push(CPU *cpu, uint8_t value)
-{
-    uint16_t addr = get_stack_addr(cpu);
-    write_mem(cpu, value, addr);
-    cpu->stack_pointer--;
-}
-
-void stack_push_u16(CPU *cpu, uint16_t value)
-{
-    uint8_t high = value >> 8;
-    uint8_t low = value & 0xFF;
-    stack_push(cpu, high);
-    stack_push(cpu, low);
-}
-
-uint8_t stack_pull(CPU *cpu)
-{
-    cpu->stack_pointer++;
-    uint16_t addr = get_stack_addr(cpu);
-    uint8_t value = read_mem(cpu, addr);
-    return value;
-}
-
-uint16_t stack_pull_u16(CPU *cpu)
-{
-    uint16_t addr = get_stack_addr(cpu);
-    uint16_t low = (uint16_t) stack_pull(cpu);
-    uint16_t high = (uint16_t) stack_pull(cpu) << 8;
-    return high | low;
 }
