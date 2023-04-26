@@ -504,7 +504,6 @@ uint8_t stack_pull(CPU *cpu)
 
 uint16_t stack_pull_u16(CPU *cpu)
 {
-    uint16_t addr = get_stack_addr(cpu);
     uint16_t low = (uint16_t) stack_pull(cpu);
     uint16_t high = (uint16_t) stack_pull(cpu) << 8;
     return high | low;

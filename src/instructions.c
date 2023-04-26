@@ -486,7 +486,6 @@ void ldy(CPU *cpu, AddrMode mode)
 
 void lsr_acc(CPU *cpu)
 {
-    int lsb = cpu->reg_a & 1;
     if ((cpu->reg_a & 1) != 0)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -779,6 +778,8 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
         case IndirectY:
             base_u16 = read_mem_u16(cpu, cpu->program_counter);
             return read_mem_u16(cpu, base_u16) + cpu->reg_y;
+        default:
+            return 0;
     }
 }
 
