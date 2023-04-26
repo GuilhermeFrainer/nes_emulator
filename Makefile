@@ -18,10 +18,10 @@ $(BIN): $(OBJS) $(BINDIR)
 	$(CC) $(CFLAGS) -o $(BIN) $(OBJS)
 
 $(OBJDIR)/main.o: $(SRCDIR)/main.c $(SRCDIR)/cpu.h $(OBJDIR)
-	$(CC) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/%.h $(OBJDIR)
-	$(CC) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Create obj and bin directories if they don't exist
 $(OBJDIR):
