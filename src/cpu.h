@@ -45,7 +45,7 @@ typedef struct CPU
 
 #define STACK 0x0100
 
-CPU new_cpu(void);
+CPU *new_cpu(void);
 
 // Memory functions
 uint8_t read_mem(CPU *cpu, uint16_t addr);

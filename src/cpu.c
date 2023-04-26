@@ -1,15 +1,16 @@
 #include "cpu.h"
 #include "instructions.h"
+#include <stdlib.h>
 
-CPU new_cpu(void)
+CPU *new_cpu(void)
 {
-    CPU cpu;
-    cpu.status = 0;
-    cpu.program_counter = 0;
-    cpu.stack_pointer = 0;
-    cpu.reg_a = 0;
-    cpu.reg_x = 0;
-    cpu.reg_y = 0;
+    CPU *cpu = malloc(sizeof(CPU));
+    cpu->status = 0;
+    cpu->program_counter = 0;
+    cpu->stack_pointer = 0;
+    cpu->reg_a = 0;
+    cpu->reg_x = 0;
+    cpu->reg_y = 0;
     return cpu;
 }
 
