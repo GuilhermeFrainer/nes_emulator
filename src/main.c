@@ -1,8 +1,10 @@
-#include <stdio.h>
-#include <stdint.h>
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
+#include "../lib/io.h"
+
 #include <SDL2/SDL.h>
+#include <stdio.h>
+#include <stdint.h>
 
 int main(int argc, char **argv)
 {
@@ -34,19 +36,64 @@ int main(int argc, char **argv)
     
     int program_length = sizeof(program)/sizeof(program[0]);
     
-    if (SDL_Init(SDL_INIT_VIDEO) == -1)
+    // SDL Inits
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         printf("SDL_Init() failed. Error: %s\n", SDL_GetError());
         return 1;
     }
+
+    SDL_Window *window  = SDL_CreateWindow(
+        "Snake game",
+        100,
+        100,
+        WIN_WIDTH,
+        WIN_HEIGHT,
+        SDL_WINDOW_SHOWN
+    );
+    if (window == NULL)
+    {
+        printf("Error in creating window: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+    {
+        printf("Error in creating renderer: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    if (SDL_RenderSetLogicalSize(renderer, GAME_WIDTH, GAME_HEIGHT) != 0)
+    {
+        printf("Error in setting logical size: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    if (SDL_RenderSetScale(renderer, SCALE, SCALE) != 0)
+    {
+        printf("Error in setting scale: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_Texture *texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGB24,
+        SDL_TEXTUREACCESS_TARGET,
+        GAME_WIDTH,
+        GAME_HEIGHT
+    );
 
     CPU *cpu = new_cpu();
     load(cpu, program, program_length);
     reset(cpu);
     run(cpu);
 
+    // SDL cleanup
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+
     SDL_Quit();
-
-
     return 0;
 }
