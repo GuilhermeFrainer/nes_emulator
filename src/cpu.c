@@ -66,6 +66,10 @@ void run(CPU *cpu)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
         interpret(cpu, opcode);
+        if (opcode == 0x00)
+        {
+            return;
+        }
     }
 }   
         
@@ -110,10 +114,12 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x1E:
             asl(cpu, inst.mode);
             break;
+
         case 0x90:
             bcc(cpu);
             branch = true;
             break;
+
         case 0xB0:
             bcs(cpu);
             branch = true;
@@ -122,6 +128,7 @@ void interpret(CPU *cpu, uint8_t opcode)
             beq(cpu);
             branch = true;
             break;
+
         case 0x24:
         case 0x2C:
             bit(cpu, inst.mode);
@@ -131,37 +138,47 @@ void interpret(CPU *cpu, uint8_t opcode)
             bmi(cpu);
             branch = true;
             break;
+
         case 0xD0:
             bne(cpu);
             branch = true;
             break;
+
         case 0x10:
             bpl(cpu);
             branch = true;
             break;
+
         case 0x00:
             brk(cpu);
             return;
+
         case 0x50:
             bvc(cpu);
             branch = true;
             break;
+
         case 0x70:
             bvs(cpu);
             branch = true;
             break;
+
         case 0x18:
             clc(cpu);
             break;
+
         case 0xD8:
             cld(cpu);
             break;
+
         case 0x58:
             cli(cpu);
             break;
+
         case 0xB8:
             clv(cpu);
             break;
+
         case 0xC9:
         case 0xC5:
         case 0xD5:
@@ -178,11 +195,13 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xEC:
             cpx(cpu, inst.mode);
             break;
+
         case 0xC0:
         case 0xC4:
         case 0xCC:
             cpy(cpu, inst.mode);
             break;
+
         case 0xC6:
         case 0xD6:
         case 0xCE:
@@ -193,9 +212,11 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xCA:
             dex(cpu);
             break;
+
         case 0x88:
             dey(cpu);
             break;
+
         case 0x49:
         case 0x45:
         case 0x55:
@@ -213,21 +234,26 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xFE:
             inc(cpu, inst.mode);
             break;
+
         case 0xE8:
             inx(cpu);
             break;
+
         case 0xC8:
             iny(cpu);
             break;
+
         case 0x4C:
         case 0x6C:
             jmp(cpu, inst.mode);
             branch = true;
             break;
+
         case 0x20:
             jsr(cpu);
             branch = true;
             break;
+
         case 0xA9:
         case 0xA5:
         case 0xB5:
@@ -238,6 +264,7 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xB1:
             lda(cpu, inst.mode);
             break;
+
         case 0xA2:
         case 0xA6:
         case 0xB6:
@@ -245,6 +272,7 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xBE:
             ldx(cpu, inst.mode);
             break;
+
         case 0xA0:
         case 0xA4:
         case 0xB4:
@@ -252,6 +280,7 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xBC:
             ldy(cpu, inst.mode);
             break;
+
         case 0x4A:
             lsr_acc(cpu);
             break;
@@ -262,9 +291,11 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x5E:
             lsr(cpu, inst.mode);
             break;
+
         case 0xEA:
             // NOP
             break;
+
         case 0x09:
         case 0x05:
         case 0x15:
@@ -275,18 +306,23 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x11:
             ora(cpu, inst.mode);
             break;
+
         case 0x48:
             pha(cpu);
             break;
+
         case 0x08:
             php(cpu);
             break;
+
         case 0x68:
             pla(cpu);
             break;
+
         case 0x28:
             plp(cpu);
             break;
+
         case 0x2A:
             rol_acc(cpu);
             break;
@@ -297,15 +333,18 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x3E:
             rol(cpu, inst.mode);
             break;
+
         case 0x6A:
             ror_acc(cpu);
             break;
+
         case 0x66:
         case 0x76:
         case 0x6E:
         case 0x7E:
             ror(cpu, inst.mode);
             break;
+
         case 0x40:
             rti(cpu);
             break;
@@ -313,6 +352,7 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x60:
             rts(cpu);
             break;
+
         case 0xE9:
         case 0xE5:
         case 0xF5:
@@ -327,12 +367,15 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x38:
             sec(cpu);
             break;
+
         case 0xF8:
             sed(cpu);
             break;
+
         case 0x78:
             sei(cpu);
             break;
+
         case 0x85:
         case 0x95:
         case 0x8D:
@@ -342,11 +385,13 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x91:
             sta(cpu, inst.mode);
             break;
+
         case 0x86:
         case 0x96:
         case 0x8E:
             stx(cpu, inst.mode);
             break;
+
         case 0x84:
         case 0x94:
         case 0x8C:
@@ -356,18 +401,23 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0xAA:
             tax(cpu);
             break;
+
         case 0xA8:
             tay(cpu);
             break;
+
         case 0xBA:
             tsx(cpu);
             break;
+
         case 0x8A:
             txa(cpu);
             break;
+
         case 0x9A:
             txs(cpu);
             break;
+
         case 0x98:
             tya(cpu);
             break;
@@ -379,7 +429,6 @@ void interpret(CPU *cpu, uint8_t opcode)
     {
         cpu->program_counter = original_pc_state + inst.bytes;
     }
-    
 }
 
 void displace(CPU *cpu, uint8_t displacement, Instruction inst)
