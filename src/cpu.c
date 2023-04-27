@@ -2,6 +2,9 @@
 #include "../lib/instructions.h"
 #include <stdlib.h>
 
+#include <stdio.h>
+#include <string.h>
+
 CPU *new_cpu(void)
 {
     CPU *cpu = malloc(sizeof(CPU));
@@ -11,6 +14,7 @@ CPU *new_cpu(void)
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
+    memset(cpu->memory, 0, sizeof(cpu->memory));
     return cpu;
 }
 
@@ -66,6 +70,7 @@ void run(CPU *cpu)
     while (1)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
+        printf("Running: %x\n", opcode);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {
