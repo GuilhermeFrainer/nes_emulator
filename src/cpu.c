@@ -59,10 +59,10 @@ void load(CPU *cpu, uint8_t program[], int program_length)
 {
     for (int i = 0; i < program_length; i++)
     {
-        cpu->memory[i + 0x8000] = program[i];
+        cpu->memory[i + PROGRAM_START] = program[i];
     }
-    write_mem_u16(cpu, 0x8000, 0xFFFC);
-    cpu->program_counter = 0x8000;
+    write_mem_u16(cpu, PROGRAM_START, 0xFFFC);
+    cpu->program_counter = PROGRAM_START;
 }
 
 void run(CPU *cpu)

@@ -46,6 +46,8 @@ typedef struct CPU
 #define STACK 0x0100
 #define STACK_RESET 0xFD
 
+#define PROGRAM_START 0x0600
+
 CPU *new_cpu(void);
 
 // Memory functions

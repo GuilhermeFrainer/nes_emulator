@@ -3,6 +3,7 @@
 #include "../lib/instructions.h"
 
 #include <stdlib.h>
+#include <stdint.h>
 
 int main(void);
 void test_new(void);
@@ -80,11 +81,15 @@ void test_load(void)
     CPU *cpu = new_cpu();
     uint8_t program[3] = { 0xAB, 0xCD, 0xDE };
     load(cpu, program, 3);
-    assert_eq(cpu->memory[0xFFFC], 0x00);
-    assert_eq(cpu->memory[0xFFFD], 0x80);
-    assert_eq(cpu->memory[0x8000], 0xAB);
-    assert_eq(cpu->memory[0x8001], 0xCD);
-    assert_eq(cpu->memory[0x8002], 0xDE);
+
+    uint8_t program_start_lsb = PROGRAM_START & 0xFF;
+    uint8_t program_start_msb = PROGRAM_START >> 8;
+    
+    assert_eq(cpu->memory[0xFFFC], program_start_lsb);
+    assert_eq(cpu->memory[0xFFFD], program_start_msb);
+    assert_eq(cpu->memory[PROGRAM_START], 0xAB);
+    assert_eq(cpu->memory[PROGRAM_START + 1], 0xCD);
+    assert_eq(cpu->memory[PROGRAM_START + 2], 0xDE);
     free(cpu);
 }
 
