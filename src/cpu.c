@@ -1,8 +1,7 @@
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
-#include <stdlib.h>
 
-#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 CPU *new_cpu(void)
@@ -70,7 +69,6 @@ void run(CPU *cpu)
     while (1)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
-        printf("Running: %x\n", opcode);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {

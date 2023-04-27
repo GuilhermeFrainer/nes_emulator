@@ -46,4 +46,7 @@ int main(int argc, char **argv)
     run(cpu);
 
     SDL_Quit();
+
+
+    return 0;
 }

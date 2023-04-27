@@ -16,7 +16,7 @@ BIN = $(BINDIR)/nes_emulator
 
 # Main file instructions
 $(BIN): $(OBJS) $(BINDIR)
-	$(CC) $(CFLAGS) -o $(BIN) $(OBJS)
+	$(CC) $(CFLAGS) -o $(BIN) $(OBJS) -lmingw32 -lSDL2main -lSDL2
 
 $(OBJDIR)/main.o: $(SRCDIR)/main.c $(LIBDIR)/cpu.h $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
