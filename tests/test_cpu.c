@@ -1,6 +1,6 @@
 #include "test_framework.h"
-#include "../src/cpu.h"
-#include "../src/instructions.h"
+#include "../lib/cpu.h"
+#include "../lib/instructions.h"
 
 #include <stdlib.h>
 

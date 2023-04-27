@@ -5,6 +5,7 @@ CFLAGS = -g -Wall
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
+LIBDIR = lib
 TESTDIR = tests
 
 # File collections
@@ -17,10 +18,10 @@ BIN = $(BINDIR)/nes_emulator
 $(BIN): $(OBJS) $(BINDIR)
 	$(CC) $(CFLAGS) -o $(BIN) $(OBJS)
 
-$(OBJDIR)/main.o: $(SRCDIR)/main.c $(SRCDIR)/cpu.h $(OBJDIR)
+$(OBJDIR)/main.o: $(SRCDIR)/main.c $(LIBDIR)/cpu.h $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/%.h $(OBJDIR)
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(LIBDIR)/%.h $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Create obj and bin directories if they don't exist

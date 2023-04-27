@@ -1,5 +1,5 @@
-#include "instructions.h"
-#include "cpu.h"
+#include "../lib/instructions.h"
+#include "../lib/cpu.h"
 
 Instruction inst_list[0xFF];
 

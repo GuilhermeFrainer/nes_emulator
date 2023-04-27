@@ -1,5 +1,5 @@
-#include "cpu.h"
-#include "instructions.h"
+#include "../lib/cpu.h"
+#include "../lib/instructions.h"
 #include <stdlib.h>
 
 CPU *new_cpu(void)
