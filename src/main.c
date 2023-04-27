@@ -2,8 +2,9 @@
 #include <stdint.h>
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
+#include <SDL2/SDL.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
     
     uint8_t program[] = {
@@ -31,10 +32,18 @@ int main(void)
     
     populate_inst_list();
     
-    //uint8_t program[] = {0xA9, 0xC0, 0xAA, 0xE8, 0x00};
     int program_length = sizeof(program)/sizeof(program[0]);
     
+    if (SDL_Init(SDL_INIT_VIDEO) == -1)
+    {
+        printf("SDL_Init() failed. Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
     CPU *cpu = new_cpu();
     load(cpu, program, program_length);
+    reset(cpu);
     run(cpu);
+
+    SDL_Quit();
 }
