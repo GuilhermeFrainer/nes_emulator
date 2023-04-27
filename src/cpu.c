@@ -7,7 +7,7 @@ CPU *new_cpu(void)
     CPU *cpu = malloc(sizeof(CPU));
     cpu->status = 0;
     cpu->program_counter = 0;
-    cpu->stack_pointer = 0;
+    cpu->stack_pointer = STACK_RESET;
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
@@ -48,6 +48,7 @@ void reset(CPU *cpu)
     cpu->reg_y = 0;
     cpu->status = 0;
     cpu->program_counter = read_mem_u16(cpu, 0xFFFC);
+    cpu->stack_pointer = STACK_RESET;
 }
 
 void load(CPU *cpu, uint8_t program[], int program_length)

@@ -44,6 +44,7 @@ typedef struct CPU
 #define CARRY_FLAG     0b00000001
 
 #define STACK 0x0100
+#define STACK_RESET 0xFD
 
 CPU *new_cpu(void);
 
