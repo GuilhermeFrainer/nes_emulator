@@ -5,7 +5,7 @@ Instruction inst_list[0xFF];
 
 void populate_inst_list(void)
 {
-    for (int i = 0x00; i < 0xFF + 1; i++)
+    for (int i = 0x00; i < 0xFF; i++)
     {
         inst_list[i] = get_instruction_from_opcode(i);
     }
