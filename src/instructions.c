@@ -252,19 +252,19 @@ void asl(CPU *cpu, AddrMode mode)
 
 void bcc(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, CARRY_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (!is_set(cpu, CARRY_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
 void bcs(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, CARRY_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (is_set(cpu, CARRY_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
 void beq(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, ZERO_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (is_set(cpu, ZERO_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
@@ -285,19 +285,19 @@ void bit(CPU *cpu, AddrMode mode)
 
 void bmi(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, NEGATIVE_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (is_set(cpu, NEGATIVE_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
 void bne(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, ZERO_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (!is_set(cpu, ZERO_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
 void bpl(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, NEGATIVE_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (!is_set(cpu, NEGATIVE_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
@@ -310,13 +310,13 @@ void brk(CPU *cpu)
 
 void bvc(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, OVERFLOW_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (!is_set(cpu, OVERFLOW_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
 void bvs(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, OVERFLOW_FLAG)) ? read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (is_set(cpu, OVERFLOW_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
