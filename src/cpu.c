@@ -71,12 +71,18 @@ void load(CPU *cpu, uint8_t program[], int program_length)
 
 void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
 {
+    SDL_Event event;
+    
     while (1)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
-        write_mem(cpu, rand() % 0x100, 0xFE);
+        write_mem(cpu, rand() % 0x100, RAND_NUM_ADDR);
         interpret(cpu, opcode);
         if (opcode == 0x00)
+        {
+            return;
+        }
+        if (handle_input(cpu, &event))
         {
             return;
         }

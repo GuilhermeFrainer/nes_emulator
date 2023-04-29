@@ -2,6 +2,8 @@
 #define GAME_IO_H
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #define GAME_WIDTH 32
 #define GAME_HEIGHT 32
@@ -12,6 +14,11 @@
 #define SCREEN_MEM 0x0200
 #define SCREEN_SIZE 0x0400
 
-//extern uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
+#define RAND_NUM_ADDR 0xFE
+#define INPUT_ADDR 0xFF
+
+typedef struct CPU CPU;
+
+bool handle_input(CPU *cpu, SDL_Event *event);
 
 #endif
