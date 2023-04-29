@@ -1,8 +1,13 @@
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
+#include "../lib/io.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include <SDL2/SDL.h>
+#include <stdio.h>
+
+uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
 
 CPU *new_cpu(void)
 {
@@ -49,7 +54,7 @@ void reset(CPU *cpu)
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
-    cpu->status = 0;
+    cpu->status = 0b00100100;
     cpu->program_counter = read_mem_u16(cpu, 0xFFFC);
     cpu->stack_pointer = STACK_RESET;
 }
@@ -58,22 +63,38 @@ void load(CPU *cpu, uint8_t program[], int program_length)
 {
     for (int i = 0; i < program_length; i++)
     {
-        cpu->memory[i + PROGRAM_START] = program[i];
+        write_mem(cpu, program[i], PROGRAM_START + i);
     }
     write_mem_u16(cpu, PROGRAM_START, 0xFFFC);
     cpu->program_counter = PROGRAM_START;
 }
 
-void run(CPU *cpu)
+void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
 {
     while (1)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
+        write_mem(cpu, rand() % 0x100, 0xFE);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {
             return;
         }
+        
+        for(int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
+        {
+            bool read_memory = read_mem(cpu, SCREEN_MEM + i) > 0;
+            buffer[3 * i] = read_memory * 0xFF;
+            buffer[3 * i + 1] = read_memory * 0xFF;
+            buffer[3 * i + 2] = read_memory * 0xFF;
+        }
+
+        SDL_RenderClear(renderer);
+        SDL_UpdateTexture(texture, NULL, buffer, GAME_WIDTH * 3);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
+        
+        //SDL_Delay(100);
     }
 }   
         
@@ -84,6 +105,7 @@ void interpret(CPU *cpu, uint8_t opcode)
     cpu->program_counter++;
     bool branch = false;
 
+    //printf("Running: %s %x\n", inst.mnemonic, opcode);
     switch (opcode)
     {
         case 0x69:
@@ -128,6 +150,7 @@ void interpret(CPU *cpu, uint8_t opcode)
             bcs(cpu);
             branch = true;
             break;
+
         case 0xF0:
             beq(cpu);
             branch = true;
@@ -355,6 +378,7 @@ void interpret(CPU *cpu, uint8_t opcode)
         
         case 0x60:
             rts(cpu);
+            branch = true;
             break;
 
         case 0xE9:
