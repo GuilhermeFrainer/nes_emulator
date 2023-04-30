@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-int main(void);
 void test_new(void);
 void test_read_and_write_mem(void);
 void test_reset(void);
@@ -19,7 +18,7 @@ void test_stack(void);
 int successful_tests = 0;
 int failed_tests = 0;
 
-int main(void)
+int main(int argc, char **argv)
 {
     test_new();
     test_read_and_write_mem();
@@ -99,7 +98,7 @@ void test_run(void)
     populate_inst_list();
     uint8_t program[] = { 0xA9, 0xC0, 0xAA, 0xE8, 0x00 };
     load(cpu, program, 5);
-    run(cpu);
+    run_for_testing(cpu);
     assert_eq(cpu->reg_a, 0xC0);
     assert_eq(cpu->reg_x, 0xC1);
     free(cpu);

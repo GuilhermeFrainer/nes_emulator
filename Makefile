@@ -38,15 +38,16 @@ run: $(BIN)
 
 # TESTS
 TEST_REQS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o $(TESTDIR)/test_framework.h $(BINDIR)
-CPUOBJS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o
+CPUOBJS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o $(OBJDIR)/io.o
+TESTFLAGS = -lmingw32 -lSDL2main -lSDL2
 
 test: $(BINDIR)/test_cpu $(BINDIR)/test_instructions
 
 $(BINDIR)/test_cpu: $(TEST_REQS) $(TESTDIR)/test_cpu.c
-	$(CC) $(TESTDIR)/test_cpu.c -o $(BINDIR)/test_cpu $(CPUOBJS)
+	$(CC) $(TESTDIR)/test_cpu.c -o $(BINDIR)/test_cpu $(CPUOBJS) $(TESTFLAGS)
 
 $(BINDIR)/test_instructions: $(TEST_REQS) $(TESTDIR)/test_instructions.c
-	$(CC) $(TESTDIR)/test_instructions.c -o $(BINDIR)/test_instructions $(CPUOBJS)
+	$(CC) $(TESTDIR)/test_instructions.c -o $(BINDIR)/test_instructions $(CPUOBJS) $(TESTFLAGS)
 
 $(TESTDIR):
 	mkdir $@

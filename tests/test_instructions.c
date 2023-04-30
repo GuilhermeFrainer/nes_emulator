@@ -14,7 +14,7 @@ void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
 void test_instructions(void);
 
-int main(void)
+int main(int argc, char **argv)
 {
     test_get_instruction_from_opcode();
     test_populate_inst_list();
