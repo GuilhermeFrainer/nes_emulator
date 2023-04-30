@@ -14,11 +14,14 @@
 // Run program for testing purposes only i.e., with no io
 void run_for_testing(CPU *cpu)
 {
-    uint8_t opcode = read_mem(cpu, cpu->program_counter);
-    interpret(cpu, opcode);
-    if (opcode == 0x00)
+    while (1)
     {
-        return;
+        uint8_t opcode = read_mem(cpu, cpu->program_counter);
+        interpret(cpu, opcode);
+        if (opcode == 0x00)
+        {
+            return;
+        }
     }
 }
 

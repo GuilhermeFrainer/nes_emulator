@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 void test_new(void);
 void test_read_and_write_mem(void);
@@ -67,7 +68,7 @@ void test_reset(void)
     cpu->status = 64;
     write_mem_u16(cpu, 0xABCD, 0xFFFC);
     reset(cpu);
-    assert_eq(cpu->status, 0);
+    assert_eq(cpu->status, 0b00100100);
     assert_eq(cpu->reg_a, 0);
     assert_eq(cpu->reg_x, 0);
     assert_eq(cpu->reg_y, 0);
@@ -96,9 +97,12 @@ void test_run(void)
 {
     CPU *cpu = new_cpu();
     populate_inst_list();
+    
     uint8_t program[] = { 0xA9, 0xC0, 0xAA, 0xE8, 0x00 };
-    load(cpu, program, 5);
+    int program_length = sizeof(program) / sizeof(program[0]);
+    load(cpu, program, program_length);
     run_for_testing(cpu);
+
     assert_eq(cpu->reg_a, 0xC0);
     assert_eq(cpu->reg_x, 0xC1);
     free(cpu);
