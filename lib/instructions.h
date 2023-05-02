@@ -147,6 +147,6 @@ void branch(CPU *cpu, bool condition);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
-void add_with_carry(CPU *cpu, uint8_t operand);
+void add_with_carry(CPU *cpu, uint8_t operand, bool addition);
 
 #endif

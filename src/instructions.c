@@ -224,7 +224,7 @@ void adc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = read_mem(cpu, addr);
-    add_with_carry(cpu, operand);
+    add_with_carry(cpu, operand, true);
 }
 
 void and(CPU *cpu, AddrMode mode)
@@ -652,7 +652,7 @@ void sbc(CPU *cpu, AddrMode mode)
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = read_mem(cpu, addr);
     operand = ~operand + 1;
-    add_with_carry(cpu, operand);
+    add_with_carry(cpu, operand, false);
 }
 
 // Set flag instructions
@@ -797,9 +797,15 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
 }
 
 // Made to implement both ADC and SBC more easily
-void add_with_carry(CPU *cpu, uint8_t operand)
+void add_with_carry(CPU *cpu, uint8_t operand, bool addition)
 {
     uint8_t carry_in = is_set(cpu, CARRY_FLAG);
+    if (!addition)
+    {
+        carry_in = ~carry_in;
+        carry_in <<= 7;
+        carry_in >>= 7;
+    }
     uint16_t sum = (uint16_t) cpu->reg_a + operand + carry_in;
 
     // Check if carry flag must be set
