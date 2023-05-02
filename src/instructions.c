@@ -762,12 +762,12 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
         case Immediate: return cpu->program_counter;
 
         case ZeroPage: return read_mem(cpu, cpu->program_counter);
-        case ZeroPageX: return read_mem(cpu, cpu->program_counter) + cpu->reg_x;
-        case ZeroPageY: return read_mem(cpu, cpu->program_counter) + cpu->reg_y;
+        case ZeroPageX: return read_mem(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
+        case ZeroPageY: return read_mem(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
 
         case Absolute: return read_mem_u16(cpu, cpu->program_counter);
-        case AbsoluteX: return read_mem_u16(cpu, cpu->program_counter) + cpu->reg_x;
-        case AbsoluteY: return read_mem_u16(cpu, cpu->program_counter) + cpu->reg_y;
+        case AbsoluteX: return read_mem_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
+        case AbsoluteY: return read_mem_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
 
         case Indirect:
             uint16_t base_u16 = read_mem_u16(cpu, cpu->program_counter);
@@ -786,20 +786,13 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
 // Made to implement both ADC and SBC more easily
 void add_with_carry(CPU *cpu, uint8_t operand)
 {
-    uint8_t old_carry = cpu->status & CARRY_FLAG;
-    uint8_t result = cpu->reg_a + old_carry + operand;
-
-    // Check if overflow flag must be set
-    // Check sources for a detailed explanation
-    uint8_t reg_a_sign_bit = cpu->reg_a >> 7;
-    uint8_t operand_sign_bit = operand >> 7;
+    uint8_t carry_in = is_set(cpu, CARRY_FLAG);
+    uint16_t sum = (uint16_t) cpu->reg_a + operand + carry_in;
 
     // Check if carry flag must be set
-    uint8_t new_carry = old_carry + reg_a_sign_bit + operand_sign_bit;
-    if (new_carry >= 2)
+    if (sum > 0xFF)
     {
         set_flag(cpu, CARRY_FLAG);
-        new_carry = 1;
     }
     else
     {
@@ -808,7 +801,8 @@ void add_with_carry(CPU *cpu, uint8_t operand)
     
     // Check if overflow flag must be set
     // Check sources for a detailed explanation
-    if (old_carry != new_carry)
+    uint8_t result = (uint8_t) sum;
+    if (((cpu->reg_a ^ result) & (operand ^ result) & 0x80) != 0)
     {
         set_flag(cpu, OVERFLOW_FLAG);
     }

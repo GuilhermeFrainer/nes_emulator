@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 int successful_tests = 0;
 int failed_tests = 0;
@@ -13,6 +14,7 @@ void test_populate_inst_list(void);
 void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
 void test_instructions(void);
+void test_add_with_carry(void);
 
 int main(int argc, char **argv)
 {
@@ -21,6 +23,7 @@ int main(int argc, char **argv)
     test_update_zero_and_negative_flags();
     test_get_operand_addr();
     test_instructions();
+    test_add_with_carry();
     end_tests();
 }
 
@@ -104,5 +107,22 @@ void test_instructions(void)
     write_mem(cpu, 0x80, 0);
     adc(cpu, Immediate);
     assert_eq(cpu->status, CARRY_FLAG | OVERFLOW_FLAG);
+    free(cpu);
+}
+
+// Tests the add with carry function and its instructions
+void test_add_with_carry(void)
+{
+    // Initialization
+    CPU *cpu = new_cpu();
+    populate_inst_list();
+    
+    // Makes ADC operation that should overflow
+    set_reg_a(cpu, 150);
+    add_with_carry(cpu, 150);
+    assert_eq(is_set(cpu, OVERFLOW_FLAG), true);
+    assert_eq(is_set(cpu, CARRY_FLAG), true);
+
+    // Cleanup
     free(cpu);
 }
