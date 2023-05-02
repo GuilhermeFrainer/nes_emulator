@@ -273,12 +273,27 @@ void bit(CPU *cpu, AddrMode mode)
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = read_mem(cpu, addr);
 
-    cpu->status = ((cpu->reg_a & operand) == 0) ? cpu->status | ZERO_FLAG : cpu->status & ~ZERO_FLAG;
+    ((cpu->reg_a & operand) == 0) ? set_flag(cpu, ZERO_FLAG) : unset_flag(cpu, ZERO_FLAG);
     
     // Set V flag to operand 6th bit
-    cpu->status = cpu->status | (OVERFLOW_FLAG & cpu->status);
+    if ((operand & OVERFLOW_FLAG) != 0)
+    {
+        set_flag(cpu, OVERFLOW_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, OVERFLOW_FLAG);
+    }
+
     // Set N flag to operand 7th bit
-    cpu->status = cpu->status | (NEGATIVE_FLAG & cpu->status);
+    if ((operand & NEGATIVE_FLAG) != 0)
+    {
+        set_flag(cpu, NEGATIVE_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, NEGATIVE_FLAG);
+    }
 }
 
 // Branch instructions part 2
