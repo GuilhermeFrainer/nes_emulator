@@ -127,7 +127,7 @@ void sec(CPU *cpu);
 void sed(CPU *cpu);
 void sei(CPU *cpu);
 
-// Store accumulator
+// Store register
 void sta(CPU *cpu, AddrMode mode);
 void stx(CPU *cpu, AddrMode mode);
 void sty(CPU *cpu, AddrMode mode);
