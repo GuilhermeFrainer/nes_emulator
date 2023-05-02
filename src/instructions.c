@@ -252,20 +252,17 @@ void asl(CPU *cpu, AddrMode mode)
 
 void bcc(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, CARRY_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, !is_set(cpu, CARRY_FLAG));
 }
 
 void bcs(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, CARRY_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, is_set(cpu, CARRY_FLAG));
 }
 
 void beq(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, ZERO_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, is_set(cpu, ZERO_FLAG));
 }
 
 void bit(CPU *cpu, AddrMode mode)
@@ -276,7 +273,7 @@ void bit(CPU *cpu, AddrMode mode)
     ((cpu->reg_a & operand) == 0) ? set_flag(cpu, ZERO_FLAG) : unset_flag(cpu, ZERO_FLAG);
     
     // Set V flag to operand 6th bit
-    if ((operand & OVERFLOW_FLAG) != 0)
+    if ((operand & 0b01000000) != 0)
     {
         set_flag(cpu, OVERFLOW_FLAG);
     }
@@ -286,7 +283,7 @@ void bit(CPU *cpu, AddrMode mode)
     }
 
     // Set N flag to operand 7th bit
-    if ((operand & NEGATIVE_FLAG) != 0)
+    if ((operand & 0b10000000) != 0)
     {
         set_flag(cpu, NEGATIVE_FLAG);
     }
@@ -300,20 +297,17 @@ void bit(CPU *cpu, AddrMode mode)
 
 void bmi(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, NEGATIVE_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, is_set(cpu, NEGATIVE_FLAG));
 }
 
 void bne(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, ZERO_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, !is_set(cpu, ZERO_FLAG));
 }
 
 void bpl(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, NEGATIVE_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, !is_set(cpu, NEGATIVE_FLAG));
 }
 
 void brk(CPU *cpu)
@@ -325,14 +319,12 @@ void brk(CPU *cpu)
 
 void bvc(CPU *cpu)
 {
-    cpu->program_counter += (!is_set(cpu, OVERFLOW_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, !is_set(cpu, OVERFLOW_FLAG));
 }
 
 void bvs(CPU *cpu)
 {
-    cpu->program_counter += (is_set(cpu, OVERFLOW_FLAG)) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
-    cpu->program_counter++;
+    branch(cpu, is_set(cpu, OVERFLOW_FLAG));
 }
 
 // Clear flag instructions
@@ -735,6 +727,12 @@ void tya(CPU *cpu)
 // End instructions
 
 // Utility functions
+
+void branch(CPU *cpu, bool condition)
+{
+    cpu->program_counter += (condition) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter++;
+}
 
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
 {
