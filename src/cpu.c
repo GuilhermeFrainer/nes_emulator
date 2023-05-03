@@ -86,20 +86,14 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
         {
             return;
         }
-        
-        for (int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
+        if (read_screen_state(cpu, buffer))
         {
-            uint8_t mem_readory = mem_read(cpu, SCREEN_MEM + i);
-            Color color = get_color(mem_readory);
-            buffer[3 * i] = color.r;
-            buffer[3 * i + 1] = color.g;
-            buffer[3 * i + 2] = color.b;
+            SDL_RenderClear(renderer);
+            SDL_UpdateTexture(texture, NULL, buffer, GAME_WIDTH * 3);
+            SDL_RenderCopy(renderer, texture, NULL, NULL);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(50);
         }
-
-        SDL_RenderClear(renderer);
-        SDL_UpdateTexture(texture, NULL, buffer, GAME_WIDTH * 3);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
-        SDL_RenderPresent(renderer);
     }
 }   
         

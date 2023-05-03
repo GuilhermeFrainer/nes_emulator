@@ -85,3 +85,21 @@ Color new_color(uint8_t red, uint8_t green, uint8_t blue)
     color.b = blue;
     return color;
 }
+
+bool read_screen_state(CPU *cpu, uint8_t buffer[GAME_HEIGHT * GAME_WIDTH * 3])
+{
+    bool update = false;
+    for (int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
+    {
+        uint8_t read_memory = mem_read(cpu, SCREEN_MEM + i);
+        Color color = get_color(read_memory);
+        if (buffer[3 * i] != color.r || buffer[3 * i + 1] != color.g || buffer[3 * i + 2] != color.b)
+        {
+            buffer[3 * i] = color.r;
+            buffer[3 * i + 1] = color.g;
+            buffer[3 * i + 2] = color.b;
+            update = true;
+        }
+    }
+    return update;
+}
