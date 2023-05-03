@@ -24,6 +24,9 @@ $(OBJDIR)/main.o: $(SRCDIR)/main.c $(LIBDIR)/cpu.h $(OBJDIR)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(LIBDIR)/%.h $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+release: $(OBJS) $(BINDIR)
+	$(CC) -O2 -o $(BIN) $(OBJS) -lmingw32 -lSDL2main -lSDL2
+
 # Create obj and bin directories if they don't exist
 $(OBJDIR):
 	mkdir $@
