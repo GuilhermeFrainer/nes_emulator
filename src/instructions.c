@@ -19,6 +19,15 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         // opcode, mnemonic, bytes, cycles, mode
         // In alphabetical order of mnemonics
         // Some are grouped by functionality, but that is just an alphabetical coincidence
+        case 0x69: inst = (Instruction) {0x69, "ADC", 2, 2, Immediate}; return inst;
+        case 0x65: inst = (Instruction) {0x65, "ADC", 2, 3, ZeroPage}; return inst;
+        case 0x75: inst = (Instruction) {0x75, "ADC", 2, 4, ZeroPageX}; return inst;
+        case 0x6D: inst = (Instruction) {0x6D, "ADC", 3, 4, Absolute}; return inst;
+        case 0x7D: inst = (Instruction) {0x7D, "ADC", 3, 4, AbsoluteX}; return inst;
+        case 0x79: inst = (Instruction) {0x79, "ADC", 3, 4, AbsoluteY}; return inst;
+        case 0x61: inst = (Instruction) {0x61, "ADC", 2, 6, IndirectX}; return inst;
+        case 0x71: inst = (Instruction) {0x71, "ADC", 2, 5, IndirectY}; return inst;
+
         case 0x29: inst = (Instruction) {0x29, "AND", 2, 2, Immediate}; return inst;
         case 0x25: inst = (Instruction) {0x25, "AND", 2, 3, ZeroPage}; return inst;
         case 0x35: inst = (Instruction) {0x35, "AND", 2, 4, ZeroPageX}; return inst;
