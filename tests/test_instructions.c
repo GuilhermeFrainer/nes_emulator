@@ -15,6 +15,7 @@ void test_update_zero_and_negative_flags(void);
 void test_get_operand_addr(void);
 void test_instructions(void);
 void test_add_with_carry(void);
+void test_inc_instructions(void);
 
 int main(int argc, char **argv)
 {
@@ -24,6 +25,7 @@ int main(int argc, char **argv)
     test_get_operand_addr();
     test_instructions();
     test_add_with_carry();
+    test_inc_instructions();
     end_tests();
 }
 
@@ -119,10 +121,19 @@ void test_add_with_carry(void)
     
     // Makes ADC operation that should overflow
     set_reg_a(cpu, 150);
-    add_with_carry(cpu, 150);
+    add_with_carry(cpu, 150, true);
     assert_eq(is_set(cpu, OVERFLOW_FLAG), true);
     assert_eq(is_set(cpu, CARRY_FLAG), true);
 
     // Cleanup
     free(cpu);
+}
+
+void test_inc_instructions(void)
+{
+    CPU *cpu = new_cpu();
+    reset(cpu);
+    write_mem(cpu, 0x10, cpu->program_counter);
+    inc(cpu, Immediate);
+    assert_eq(read_mem(cpu, cpu->program_counter), 0x11);
 }

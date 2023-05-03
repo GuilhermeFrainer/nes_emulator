@@ -76,7 +76,7 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
     while (1)
     {
         uint8_t opcode = read_mem(cpu, cpu->program_counter);
-        write_mem(cpu, rand() % 0x100, RAND_NUM_ADDR);
+        write_mem(cpu, (rand() % 256) + 1, RAND_NUM_ADDR);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {
@@ -87,12 +87,13 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
             return;
         }
         
-        for(int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
+        for (int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
         {
-            bool read_memory = read_mem(cpu, SCREEN_MEM + i) > 0;
-            buffer[3 * i] = read_memory * 0xFF;
-            buffer[3 * i + 1] = read_memory * 0xFF;
-            buffer[3 * i + 2] = read_memory * 0xFF;
+            uint8_t read_memory = read_mem(cpu, SCREEN_MEM + i);
+            Color color = get_color(read_memory);
+            buffer[3 * i] = color.r;
+            buffer[3 * i + 1] = color.g;
+            buffer[3 * i + 2] = color.b;
         }
 
         SDL_RenderClear(renderer);
@@ -111,7 +112,7 @@ void interpret(CPU *cpu, uint8_t opcode)
     cpu->program_counter++;
     bool branch = false;
 
-    //printf("Running: %s %x\n", inst.mnemonic, opcode);
+    //printf("Running: %s %02x at %04x\n", inst.mnemonic, opcode, cpu->program_counter - 1);
     switch (opcode)
     {
         case 0x69:

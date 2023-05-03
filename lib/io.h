@@ -19,6 +19,14 @@
 
 typedef struct CPU CPU;
 
+typedef struct Color {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} Color;
+
 bool handle_input(CPU *cpu, SDL_Event *event);
+Color get_color(uint8_t byte);
+Color new_color(uint8_t red, uint8_t green, uint8_t blue);
 
 #endif
