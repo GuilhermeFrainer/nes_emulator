@@ -795,11 +795,11 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             uint16_t base_u16 = read_mem_u16(cpu, cpu->program_counter);
             return read_mem_u16(cpu, base_u16);
         case IndirectX:
-            uint8_t base_u8 = read_mem(cpu, cpu->program_counter);
-            return read_mem_u16(cpu, base_u8 + cpu->reg_x);
+            uint8_t base_x = read_mem(cpu, cpu->program_counter);
+            return read_mem_u16(cpu, base_x + cpu->reg_x);
         case IndirectY:
-            base_u16 = read_mem_u16(cpu, cpu->program_counter);
-            return read_mem_u16(cpu, base_u16) + cpu->reg_y;
+            uint8_t base_y = read_mem(cpu, cpu->program_counter);
+            return read_mem_u16(cpu, base_y) + cpu->reg_y;
         default:
             return 0;
     }
