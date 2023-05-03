@@ -52,10 +52,10 @@ typedef struct CPU
 CPU *new_cpu(void);
 
 // Memory functions
-uint8_t read_mem(CPU *cpu, uint16_t addr);
-uint16_t read_mem_u16(CPU *cpu, uint16_t addr);
-void write_mem(CPU *cpu, uint8_t value, uint16_t addr);
-void write_mem_u16(CPU *cpu, uint16_t value, uint16_t addr);
+uint8_t mem_read(CPU *cpu, uint16_t addr);
+uint16_t mem_read_u16(CPU *cpu, uint16_t addr);
+void mem_write(CPU *cpu, uint8_t value, uint16_t addr);
+void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr);
 
 // Running functions
 void reset(CPU *cpu);

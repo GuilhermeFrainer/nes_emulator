@@ -16,7 +16,7 @@ void run_for_testing(CPU *cpu)
 {
     while (1)
     {
-        uint8_t opcode = read_mem(cpu, cpu->program_counter);
+        uint8_t opcode = mem_read(cpu, cpu->program_counter);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {

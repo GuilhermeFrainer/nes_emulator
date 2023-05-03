@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 void test_new(void);
-void test_read_and_write_mem(void);
+void test_read_and_mem_write(void);
 void test_reset(void);
 void test_load(void);
 void test_run(void);
@@ -22,7 +22,7 @@ int failed_tests = 0;
 int main(int argc, char **argv)
 {
     test_new();
-    test_read_and_write_mem();
+    test_read_and_mem_write();
     test_reset();
     test_load();
     test_run();
@@ -44,18 +44,18 @@ void test_new(void)
     free(cpu);
 }
 
-void test_read_and_write_mem(void)
+void test_read_and_mem_write(void)
 {
     CPU *cpu = new_cpu();
-    write_mem(cpu, 0xAB, 0x8000);
+    mem_write(cpu, 0xAB, 0x8000);
     assert_eq(cpu->memory[0x8000], 0xAB);
-    assert_eq(read_mem(cpu, 0x8000), 0xAB);
+    assert_eq(mem_read(cpu, 0x8000), 0xAB);
     
     // 16 bit tests
-    write_mem_u16(cpu, 0xABCD, 0x8000);
+    mem_write_u16(cpu, 0xABCD, 0x8000);
     assert_eq(cpu->memory[0x8000], 0xCD);
     assert_eq(cpu->memory[0x8000 + 1], 0xAB);
-    assert_eq(read_mem_u16(cpu, 0x8000), 0xABCD);
+    assert_eq(mem_read_u16(cpu, 0x8000), 0xABCD);
     free(cpu);
 }
 
@@ -66,7 +66,7 @@ void test_reset(void)
     cpu->reg_x = 25;
     cpu->reg_y = 50;
     cpu->status = 64;
-    write_mem_u16(cpu, 0xABCD, 0xFFFC);
+    mem_write_u16(cpu, 0xABCD, 0xFFFC);
     reset(cpu);
     assert_eq(cpu->status, 0b00100100);
     assert_eq(cpu->reg_a, 0);

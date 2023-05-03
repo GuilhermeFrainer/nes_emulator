@@ -232,14 +232,14 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 void adc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     add_with_carry(cpu, operand, true);
 }
 
 void and(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     set_reg_a(cpu, cpu->reg_a & operand);
 }
 
@@ -252,8 +252,8 @@ void asl_acc(CPU *cpu)
 void asl(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t value = read_mem(cpu, addr);
-    write_mem(cpu, value, addr);
+    uint8_t value = mem_read(cpu, addr);
+    mem_write(cpu, value, addr);
     update_carry_flag(cpu, value);
 }
 
@@ -277,7 +277,7 @@ void beq(CPU *cpu)
 void bit(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
 
     ((cpu->reg_a & operand) == 0) ? set_flag(cpu, ZERO_FLAG) : unset_flag(cpu, ZERO_FLAG);
     
@@ -363,7 +363,7 @@ void clv(CPU *cpu)
 void cmp(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     if (cpu->reg_a >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -379,7 +379,7 @@ void cmp(CPU *cpu, AddrMode mode)
 void cpx(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     if (cpu->reg_x >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -395,7 +395,7 @@ void cpx(CPU *cpu, AddrMode mode)
 void cpy(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     if (cpu->reg_y >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -413,9 +413,9 @@ void cpy(CPU *cpu, AddrMode mode)
 void dec(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     operand--;
-    write_mem(cpu, operand, addr);
+    mem_write(cpu, operand, addr);
     update_zero_and_negative_flags(cpu, operand);
 }
 
@@ -434,7 +434,7 @@ void dey(CPU *cpu)
 void eor(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     cpu->reg_a ^= operand;
     update_zero_and_negative_flags(cpu, cpu->reg_a); 
 }
@@ -444,9 +444,9 @@ void eor(CPU *cpu, AddrMode mode)
 void inc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     operand++;
-    write_mem(cpu, operand, addr);
+    mem_write(cpu, operand, addr);
     update_zero_and_negative_flags(cpu, operand);
 }
 
@@ -473,7 +473,7 @@ void jmp(CPU *cpu, AddrMode mode)
 void jsr(CPU *cpu)
 {
     stack_push_u16(cpu, cpu->program_counter + 2 - 1);
-    uint16_t addr = read_mem_u16(cpu, cpu->program_counter);
+    uint16_t addr = mem_read_u16(cpu, cpu->program_counter);
     cpu->program_counter = addr;
 }
 
@@ -482,21 +482,21 @@ void jsr(CPU *cpu)
 void lda(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t value = read_mem(cpu, addr);
+    uint8_t value = mem_read(cpu, addr);
     set_reg_a(cpu, value);
 }
 
 void ldx(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     set_reg_x(cpu, operand);
 }
 
 void ldy(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     set_reg_y(cpu, operand);
 }
 
@@ -516,7 +516,7 @@ void lsr_acc(CPU *cpu)
 void lsr(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     if ((operand & 1) != 0)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -525,14 +525,14 @@ void lsr(CPU *cpu, AddrMode mode)
     {
         unset_flag(cpu, CARRY_FLAG);
     }
-    write_mem(cpu, operand >> 1, addr);
+    mem_write(cpu, operand >> 1, addr);
     update_zero_and_negative_flags(cpu, operand >> 1);
 }
 
 void ora(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     set_reg_a(cpu, cpu->reg_a | operand);
 }
 
@@ -585,7 +585,7 @@ void rol_acc(CPU *cpu)
 void rol(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     uint8_t new_value = operand << 1;
     if (is_set(cpu, CARRY_FLAG))
     {
@@ -599,7 +599,7 @@ void rol(CPU *cpu, AddrMode mode)
     {
         unset_flag(cpu, CARRY_FLAG);
     }
-    write_mem(cpu, new_value, addr);
+    mem_write(cpu, new_value, addr);
 }
 
 void ror_acc(CPU *cpu)
@@ -623,7 +623,7 @@ void ror_acc(CPU *cpu)
 void ror(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     uint8_t new_value = operand >> 1;
     if (is_set(cpu, CARRY_FLAG))
     {
@@ -637,7 +637,7 @@ void ror(CPU *cpu, AddrMode mode)
     {
         unset_flag(cpu, CARRY_FLAG);
     }
-    write_mem(cpu, new_value, addr);
+    mem_write(cpu, new_value, addr);
 }
 
 // Return instructions
@@ -659,7 +659,7 @@ void rts(CPU *cpu)
 void sbc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = read_mem(cpu, addr);
+    uint8_t operand = mem_read(cpu, addr);
     operand = ~operand + 1;
     add_with_carry(cpu, operand, false);
 }
@@ -686,19 +686,19 @@ void sei(CPU *cpu)
 void sta(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    write_mem(cpu, cpu->reg_a, addr);
+    mem_write(cpu, cpu->reg_a, addr);
 }
 
 void stx(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    write_mem(cpu, cpu->reg_x, addr);
+    mem_write(cpu, cpu->reg_x, addr);
 }
 
 void sty(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
-    write_mem(cpu, cpu->reg_y, addr);
+    mem_write(cpu, cpu->reg_y, addr);
 }
 
 // Transfer instructions
@@ -739,7 +739,7 @@ void tya(CPU *cpu)
 
 void branch(CPU *cpu, bool condition)
 {
-    cpu->program_counter += (condition) ? (int8_t) read_mem(cpu, cpu->program_counter) : 0;
+    cpu->program_counter += (condition) ? (int8_t) mem_read(cpu, cpu->program_counter) : 0;
     cpu->program_counter++;
 }
 
@@ -783,23 +783,23 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
     {
         case Immediate: return cpu->program_counter;
 
-        case ZeroPage: return read_mem(cpu, cpu->program_counter);
-        case ZeroPageX: return read_mem(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
-        case ZeroPageY: return read_mem(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
+        case ZeroPage: return mem_read(cpu, cpu->program_counter);
+        case ZeroPageX: return mem_read(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
+        case ZeroPageY: return mem_read(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
 
-        case Absolute: return read_mem_u16(cpu, cpu->program_counter);
-        case AbsoluteX: return read_mem_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
-        case AbsoluteY: return read_mem_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
+        case Absolute: return mem_read_u16(cpu, cpu->program_counter);
+        case AbsoluteX: return mem_read_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
+        case AbsoluteY: return mem_read_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
 
         case Indirect:
-            uint16_t base_u16 = read_mem_u16(cpu, cpu->program_counter);
-            return read_mem_u16(cpu, base_u16);
+            uint16_t base_u16 = mem_read_u16(cpu, cpu->program_counter);
+            return mem_read_u16(cpu, base_u16);
         case IndirectX:
-            uint8_t base_x = read_mem(cpu, cpu->program_counter);
-            return read_mem_u16(cpu, base_x + cpu->reg_x);
+            uint8_t base_x = mem_read(cpu, cpu->program_counter);
+            return mem_read_u16(cpu, base_x + cpu->reg_x);
         case IndirectY:
-            uint8_t base_y = read_mem(cpu, cpu->program_counter);
-            return read_mem_u16(cpu, base_y) + cpu->reg_y;
+            uint8_t base_y = mem_read(cpu, cpu->program_counter);
+            return mem_read_u16(cpu, base_y) + cpu->reg_y;
         default:
             return 0;
     }

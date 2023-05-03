@@ -22,31 +22,31 @@ CPU *new_cpu(void)
     return cpu;
 }
 
-uint8_t read_mem(CPU *cpu, uint16_t addr)
+uint8_t mem_read(CPU *cpu, uint16_t addr)
 {
     return cpu->memory[addr];
 }
 
 // Deals with NES's little-endianess
-uint16_t read_mem_u16(CPU *cpu, uint16_t addr)
+uint16_t mem_read_u16(CPU *cpu, uint16_t addr)
 {
-    uint16_t low = read_mem(cpu, addr);
-    uint16_t high = read_mem(cpu, addr + 1);
+    uint16_t low = mem_read(cpu, addr);
+    uint16_t high = mem_read(cpu, addr + 1);
     high = high << 8;
     return high | low;
 }
 
-void write_mem(CPU *cpu, uint8_t value, uint16_t addr)
+void mem_write(CPU *cpu, uint8_t value, uint16_t addr)
 {
     cpu->memory[addr] = value;
 }
 
-void write_mem_u16(CPU *cpu, uint16_t value, uint16_t addr)
+void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr)
 {
     uint8_t low = value & 0xFF;
     uint8_t high = value >> 8;
-    write_mem(cpu, low, addr);
-    write_mem(cpu, high, addr + 1);
+    mem_write(cpu, low, addr);
+    mem_write(cpu, high, addr + 1);
 }
 
 void reset(CPU *cpu)
@@ -55,7 +55,7 @@ void reset(CPU *cpu)
     cpu->reg_x = 0;
     cpu->reg_y = 0;
     cpu->status = 0b00100100;
-    cpu->program_counter = read_mem_u16(cpu, 0xFFFC);
+    cpu->program_counter = mem_read_u16(cpu, 0xFFFC);
     cpu->stack_pointer = STACK_RESET;
 }
 
@@ -63,9 +63,9 @@ void load(CPU *cpu, uint8_t program[], int program_length)
 {
     for (int i = 0; i < program_length; i++)
     {
-        write_mem(cpu, program[i], PROGRAM_START + i);
+        mem_write(cpu, program[i], PROGRAM_START + i);
     }
-    write_mem_u16(cpu, PROGRAM_START, 0xFFFC);
+    mem_write_u16(cpu, PROGRAM_START, 0xFFFC);
     cpu->program_counter = PROGRAM_START;
 }
 
@@ -75,8 +75,8 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
     
     while (1)
     {
-        uint8_t opcode = read_mem(cpu, cpu->program_counter);
-        write_mem(cpu, (rand() % 256) + 1, RAND_NUM_ADDR);
+        uint8_t opcode = mem_read(cpu, cpu->program_counter);
+        mem_write(cpu, (rand() % 256) + 1, RAND_NUM_ADDR);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {
@@ -89,8 +89,8 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
         
         for (int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
         {
-            uint8_t read_memory = read_mem(cpu, SCREEN_MEM + i);
-            Color color = get_color(read_memory);
+            uint8_t mem_readory = mem_read(cpu, SCREEN_MEM + i);
+            Color color = get_color(mem_readory);
             buffer[3 * i] = color.r;
             buffer[3 * i + 1] = color.g;
             buffer[3 * i + 2] = color.b;
@@ -523,7 +523,7 @@ uint16_t get_stack_addr(CPU *cpu)
 void stack_push(CPU *cpu, uint8_t value)
 {
     uint16_t addr = get_stack_addr(cpu);
-    write_mem(cpu, value, addr);
+    mem_write(cpu, value, addr);
     cpu->stack_pointer--;
 }
 
@@ -539,7 +539,7 @@ uint8_t stack_pull(CPU *cpu)
 {
     cpu->stack_pointer++;
     uint16_t addr = get_stack_addr(cpu);
-    uint8_t value = read_mem(cpu, addr);
+    uint8_t value = mem_read(cpu, addr);
     return value;
 }
 
