@@ -16,6 +16,7 @@ void test_get_operand_addr(void);
 void test_instructions(void);
 void test_add_with_carry(void);
 void test_inc_instructions(void);
+void test_loops(void);
 
 int main(int argc, char **argv)
 {
@@ -26,6 +27,7 @@ int main(int argc, char **argv)
     test_instructions();
     test_add_with_carry();
     test_inc_instructions();
+    test_loops();
     end_tests();
 }
 
@@ -136,4 +138,25 @@ void test_inc_instructions(void)
     write_mem(cpu, 0x10, cpu->program_counter);
     inc(cpu, Immediate);
     assert_eq(read_mem(cpu, cpu->program_counter), 0x11);
+
+    free(cpu);
+}
+
+void test_loops(void)
+{
+    CPU *cpu = new_cpu();
+    populate_inst_list();
+    uint8_t program[] = {
+        0xa2, 0x00, 0xa0, 0x00, 0x8a, 0x99, 0x00, 0x02, 0x48, 0xe8, 0xc8, 0xc0, 0x10, 0xd0, 0xf5, 0x68,
+        0x99, 0x00, 0x02, 0xc8, 0xc0, 0x20, 0xd0, 0xf7
+    };
+
+    int program_length = sizeof(program)/sizeof(program[0]);
+    
+    load(cpu, program, program_length);
+    reset(cpu);
+    run_for_testing(cpu);
+    assert_eq(cpu->reg_y, 0x20);
+
+    free(cpu);
 }

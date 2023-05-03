@@ -100,8 +100,6 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
         SDL_UpdateTexture(texture, NULL, buffer, GAME_WIDTH * 3);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
-        
-        //SDL_Delay(100);
     }
 }   
         
@@ -112,7 +110,6 @@ void interpret(CPU *cpu, uint8_t opcode)
     cpu->program_counter++;
     bool branch = false;
 
-    //printf("Running: %s %02x at %04x\n", inst.mnemonic, opcode, cpu->program_counter - 1);
     switch (opcode)
     {
         case 0x69:
