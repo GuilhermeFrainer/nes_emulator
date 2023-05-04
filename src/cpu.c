@@ -18,13 +18,22 @@ CPU *new_cpu(void)
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
-    memset(cpu->memory, 0, sizeof(cpu->memory));
+    memset(cpu->ram, 0, sizeof(cpu->ram));
     return cpu;
 }
 
 uint8_t mem_read(CPU *cpu, uint16_t addr)
 {
-    return cpu->memory[addr];
+    if (addr >= RAM_START && addr <= RAM_MIRROR_END)
+    {
+        // RAM only takes into account the first 11 bits
+        addr &= 0b11111111111;
+        return cpu->ram[addr];
+    }
+    
+    // TODO: PPU
+    
+    return 0;
 }
 
 // Deals with NES's little-endianess
@@ -38,7 +47,13 @@ uint16_t mem_read_u16(CPU *cpu, uint16_t addr)
 
 void mem_write(CPU *cpu, uint8_t value, uint16_t addr)
 {
-    cpu->memory[addr] = value;
+    if (addr >= RAM_START && addr <= RAM_MIRROR_END)
+    {
+        // RAM only takes into account the first 11 bits
+        addr &= 0b11111111111;
+        cpu->ram[addr] = value;
+    }
+    return;
 }
 
 void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr)
