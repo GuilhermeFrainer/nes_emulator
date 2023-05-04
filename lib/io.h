@@ -25,6 +25,8 @@ typedef struct Color {
     uint8_t b;
 } Color;
 
+extern uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
+
 bool handle_input(CPU *cpu, SDL_Event *event);
 Color get_color(uint8_t byte);
 Color new_color(uint8_t red, uint8_t green, uint8_t blue);

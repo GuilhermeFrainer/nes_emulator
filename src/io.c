@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
+
 // Returns true if program should stop
 bool handle_input(CPU *cpu, SDL_Event *event)
 {

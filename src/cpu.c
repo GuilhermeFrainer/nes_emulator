@@ -7,8 +7,6 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 
-uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
-
 CPU *new_cpu(void)
 {
     CPU *cpu = malloc(sizeof(CPU));
