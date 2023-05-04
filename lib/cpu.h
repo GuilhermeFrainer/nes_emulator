@@ -69,9 +69,6 @@ void load(CPU *cpu, uint8_t program[], int program_length);
 void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture);
 void interpret(CPU *cpu, uint8_t opcode);
 
-// Utility functions
-void displace(CPU *cpu, uint8_t displacement, Instruction inst);
-
 // Register functions
 void set_reg_a(CPU *cpu, uint8_t value);
 void set_reg_x(CPU *cpu, uint8_t value);

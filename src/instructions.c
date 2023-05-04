@@ -743,6 +743,18 @@ void branch(CPU *cpu, bool condition)
     cpu->program_counter++;
 }
 
+void displace(CPU *cpu, uint8_t displacement, Instruction inst)
+{
+    if (displacement != 0)
+    {
+        cpu->program_counter += displacement;
+    }
+    else
+    {
+        cpu->program_counter += inst.bytes - 1;
+    }
+}
+
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
 {
     // Update zero flag

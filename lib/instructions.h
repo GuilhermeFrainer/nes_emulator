@@ -144,6 +144,7 @@ void tya(CPU *cpu);
 
 // Utility functions
 void branch(CPU *cpu, bool condition);
+void displace(CPU *cpu, uint8_t displacement, Instruction inst);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);

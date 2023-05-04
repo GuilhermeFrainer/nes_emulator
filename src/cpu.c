@@ -470,18 +470,6 @@ void interpret(CPU *cpu, uint8_t opcode)
     }
 }
 
-void displace(CPU *cpu, uint8_t displacement, Instruction inst)
-{
-    if (displacement != 0)
-    {
-        cpu->program_counter += displacement;
-    }
-    else
-    {
-        cpu->program_counter += inst.bytes - 1;
-    }
-}
-
 // Register functions
 
 void set_reg_a(CPU *cpu, uint8_t value)
