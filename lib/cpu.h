@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 typedef struct Instruction Instruction;
+typedef struct Bus Bus;
 
 typedef struct CPU
 {
@@ -15,7 +16,7 @@ typedef struct CPU
     uint8_t reg_a;
     uint8_t reg_x;
     uint8_t reg_y;
-    uint8_t ram[0x0800];
+    Bus *bus;
 } CPU;
 
 /* 
@@ -48,12 +49,6 @@ typedef struct CPU
 #define STACK_RESET 0xFD
 
 #define PROGRAM_START 0x0600
-
-// Memory
-#define RAM_START 0x0000
-#define RAM_MIRROR_END 0x1FFF
-#define PPU_MEM_START 0x2000
-#define PPU_MIRROR_END 0x3FFF
 
 CPU *new_cpu(void);
 

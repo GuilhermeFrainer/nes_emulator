@@ -1,6 +1,7 @@
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
 #include "../lib/io.h"
+#include "../lib/bus.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -16,22 +17,13 @@ CPU *new_cpu(void)
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
-    memset(cpu->ram, 0, sizeof(cpu->ram));
+    cpu->bus = new_bus();
     return cpu;
 }
 
 uint8_t mem_read(CPU *cpu, uint16_t addr)
 {
-    if (addr >= RAM_START && addr <= RAM_MIRROR_END)
-    {
-        // RAM only takes into account the first 11 bits
-        addr &= 0b11111111111;
-        return cpu->ram[addr];
-    }
-    
-    // TODO: PPU
-    
-    return 0;
+    return bus_mem_read(cpu->bus, addr);
 }
 
 // Deals with NES's little-endianess
@@ -45,13 +37,7 @@ uint16_t mem_read_u16(CPU *cpu, uint16_t addr)
 
 void mem_write(CPU *cpu, uint8_t value, uint16_t addr)
 {
-    if (addr >= RAM_START && addr <= RAM_MIRROR_END)
-    {
-        // RAM only takes into account the first 11 bits
-        addr &= 0b11111111111;
-        cpu->ram[addr] = value;
-    }
-    return;
+    bus_mem_write(cpu->bus, value, addr);
 }
 
 void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr)
