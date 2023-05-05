@@ -49,6 +49,7 @@ typedef struct CPU
 #define STACK_RESET 0xFD
 
 #define PROGRAM_START 0x0600
+#define PROGRAM_START_ADDR 0x0800
 
 CPU *new_cpu(void);
 

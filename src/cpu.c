@@ -54,7 +54,7 @@ void reset(CPU *cpu)
     cpu->reg_x = 0;
     cpu->reg_y = 0;
     cpu->status = 0b00100100;
-    cpu->program_counter = mem_read_u16(cpu, 0xFFFC);
+    cpu->program_counter = mem_read_u16(cpu, PROGRAM_START_ADDR);
     cpu->stack_pointer = STACK_RESET;
 }
 
@@ -64,7 +64,7 @@ void load(CPU *cpu, uint8_t program[], int program_length)
     {
         mem_write(cpu, program[i], PROGRAM_START + i);
     }
-    mem_write_u16(cpu, PROGRAM_START, 0xFFFC);
+    mem_write_u16(cpu, PROGRAM_START, PROGRAM_START_ADDR);
     cpu->program_counter = PROGRAM_START;
 }
 

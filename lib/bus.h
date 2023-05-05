@@ -9,7 +9,7 @@
 #define PPU_MIRROR_END 0x3FFF
 
 typedef struct Bus {
-    uint8_t ram[0x0800];
+    uint8_t ram[0x0801];
 } Bus;
 
 Bus *new_bus(void);
