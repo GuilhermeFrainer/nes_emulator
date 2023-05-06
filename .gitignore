@@ -1,5 +1,8 @@
 *.exe
 *.o
+.vscode
 .vscode/*
 TODO.md
 bin/SDL2.dll
+cartridges
+cartridges/*

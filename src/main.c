@@ -1,6 +1,7 @@
 #include "../lib/cpu.h"
 #include "../lib/instructions.h"
 #include "../lib/io.h"
+#include "../lib/cartridge.h"
 
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -8,6 +9,24 @@
 
 int main(int argc, char **argv)
 {
+    if (argc > 2)
+    {
+        fprintf(stderr, "Too many arguments provided. Expected 1, received %i.\n", argc - 1);
+        return 1;
+    }
+    else if (argc < 2)
+    {
+        fprintf(stderr, "Too few arguments provided. Expected 1, received %i.\n", argc - 1);
+        return 1;
+    }
+
+    ROM *rom = get_rom(argv[1]);
+    if (rom == NULL)
+    {
+        fprintf(stderr, "Something went wrong while reading the game file.\n");
+        return 1;
+    }
+    
     uint8_t program[] = {
         0x20, 0x06, 0x06, 0x20, 0x38, 0x06, 0x20, 0x0d, 0x06, 0x20, 0x2a, 0x06, 0x60, 0xa9, 0x02, 0x85,
         0x02, 0xa9, 0x04, 0x85, 0x03, 0xa9, 0x11, 0x85, 0x10, 0xa9, 0x10, 0x85, 0x12, 0xa9, 0x0f, 0x85,
@@ -36,7 +55,7 @@ int main(int argc, char **argv)
     // SDL Inits
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        printf("SDL_Init() failed. Error: %s\n", SDL_GetError());
+        fprintf(stderr, "SDL_Init() failed. Error: %s\n", SDL_GetError());
         return 1;
     }
 
@@ -50,26 +69,34 @@ int main(int argc, char **argv)
     );
     if (window == NULL)
     {
-        printf("Error in creating window: %s\n", SDL_GetError());
+        fprintf(stderr, "Error in creating window: %s\n", SDL_GetError());
         return 1;
     }
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
     {
-        printf("Error in creating renderer: %s\n", SDL_GetError());
+        fprintf(stderr, "Error in creating renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
     if (SDL_RenderSetLogicalSize(renderer, GAME_WIDTH, GAME_HEIGHT) != 0)
     {
-        printf("Error in setting logical size: %s\n", SDL_GetError());
+        fprintf(stderr, "Error in setting logical size: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
     if (SDL_RenderSetScale(renderer, SCALE, SCALE) != 0)
     {
-        printf("Error in setting scale: %s\n", SDL_GetError());
+        fprintf(stderr, "Error in setting scale: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
@@ -81,6 +108,15 @@ int main(int argc, char **argv)
         GAME_HEIGHT
     );
 
+    if (texture == NULL)
+    {
+        fprintf(stderr, "Error in creating texture: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
     CPU *cpu = new_cpu();
     populate_inst_list();
     load(cpu, program, program_length);
@@ -89,6 +125,7 @@ int main(int argc, char **argv)
 
     // Cleanup
     free(cpu);
+    free_rom(rom);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
