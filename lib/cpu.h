@@ -7,6 +7,7 @@
 
 typedef struct Instruction Instruction;
 typedef struct Bus Bus;
+typedef struct ROM ROM;
 
 typedef struct CPU
 {
@@ -51,7 +52,8 @@ typedef struct CPU
 #define PROGRAM_START 0x0600
 #define PROGRAM_START_ADDR 0x0800
 
-CPU *new_cpu(void);
+CPU *new_cpu(ROM *rom);
+void free_cpu(CPU *cpu);
 
 // Memory functions
 uint8_t mem_read(CPU *cpu, uint16_t addr);

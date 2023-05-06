@@ -3,9 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-Bus *new_bus(void)
+Bus *new_bus(ROM *rom)
 {
     Bus *bus = malloc(sizeof(Bus));
+    bus->rom = rom;
     memset(bus->ram, 0, sizeof(bus->ram));
     return bus;
 }

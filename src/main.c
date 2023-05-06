@@ -117,7 +117,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    CPU *cpu = new_cpu();
+    CPU *cpu = new_cpu(rom);
     populate_inst_list();
     load(cpu, program, program_length);
     reset(cpu);

@@ -2,13 +2,14 @@
 #include "../lib/instructions.h"
 #include "../lib/io.h"
 #include "../lib/bus.h"
+#include "../lib/cartridge.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <SDL2/SDL.h>
 #include <stdio.h>
 
-CPU *new_cpu(void)
+CPU *new_cpu(ROM *rom)
 {
     CPU *cpu = malloc(sizeof(CPU));
     cpu->status = 0;
@@ -17,8 +18,17 @@ CPU *new_cpu(void)
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
-    cpu->bus = new_bus();
+    cpu->bus = new_bus(rom);
     return cpu;
+}
+
+void free_cpu(CPU *cpu)
+{
+    free(cpu->bus->rom->prg_rom);
+    free(cpu->bus->rom->chr_rom);
+    free(cpu->bus->rom);
+    free(cpu->bus);
+    free(cpu);
 }
 
 uint8_t mem_read(CPU *cpu, uint16_t addr)

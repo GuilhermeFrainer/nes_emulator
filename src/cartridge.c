@@ -30,7 +30,7 @@ ROM *get_rom(char *file_path)
     // Checks if file has the proper NES signature
     uint8_t header[16];
     fread(header, sizeof(uint8_t), 16, file);
-    if (!check_header)
+    if (!check_header(header))
     {
         fprintf(stderr, "Error: file isn't a '.nes' file of supported iNES type.\n");
         fclose(file);
@@ -42,7 +42,7 @@ ROM *get_rom(char *file_path)
     rom->chr_rom_length = header[CHR_ROM_LENGTH_ADDR] * CHR_ROM_PAGE_SIZE;
     uint8_t control_byte_1 = header[CONTROL_BYTE_1_ADDR];
     uint8_t control_byte_2 = header[CONTROL_BYTE_2_ADDR];
-    uint8_t prg_ram_length = header[PRG_RAM_LENGTH_ADDR];
+    //uint8_t prg_ram_length = header[PRG_RAM_LENGTH_ADDR]; IMPLEMENT LATER
 
     if ((control_byte_2 & 0b00001111) != 0)
     {
@@ -95,11 +95,4 @@ bool check_header(uint8_t *header)
         }
     }
     return true;
-}
-
-void free_rom(ROM *rom)
-{
-    free(rom->prg_rom);
-    free(rom->chr_rom);
-    free(rom);
 }

@@ -40,6 +40,5 @@ extern const uint8_t NES_TAG[TAG_LENGTH];
 
 ROM *get_rom(char *file_path);
 bool check_header(uint8_t *header);
-void free_rom(ROM *rom);
 
 #endif
