@@ -5,13 +5,17 @@
 
 #define RAM_START 0x0000
 #define RAM_MIRROR_END 0x1FFF
+
 #define PPU_MEM_START 0x2000
 #define PPU_MIRROR_END 0x3FFF
+
+#define PRG_ROM_START 0x8000
+#define PRG_ROM_MIRROR_END 0xFFFF
 
 typedef struct ROM ROM;
 
 typedef struct Bus {
-    uint8_t ram[0x0801];
+    uint8_t ram[0x0800];
     ROM *rom;
 } Bus;
 

@@ -49,11 +49,11 @@ typedef struct CPU
 #define STACK 0x0100
 #define STACK_RESET 0xFD
 
-#define PROGRAM_START 0x0600
-#define PROGRAM_START_ADDR 0x0800
+#define PROGRAM_START 0x8600
+#define PROGRAM_START_ADDR 0xFFFC
 
 CPU *new_cpu(ROM *rom);
-void free_cpu(CPU *cpu);
+void destroy_cpu(CPU *cpu);
 
 // Memory functions
 uint8_t mem_read(CPU *cpu, uint16_t addr);

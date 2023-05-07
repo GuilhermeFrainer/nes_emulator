@@ -23,7 +23,6 @@ int main(int argc, char **argv)
     ROM *rom = get_rom(argv[1]);
     if (rom == NULL)
     {
-        fprintf(stderr, "Something went wrong while reading the game file.\n");
         return 1;
     }
     
@@ -124,8 +123,7 @@ int main(int argc, char **argv)
     run(cpu, renderer, texture);
 
     // Cleanup
-    free(cpu);
-    free_rom(rom);
+    destroy_cpu(cpu);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

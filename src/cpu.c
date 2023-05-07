@@ -22,7 +22,7 @@ CPU *new_cpu(ROM *rom)
     return cpu;
 }
 
-void free_cpu(CPU *cpu)
+void destroy_cpu(CPU *cpu)
 {
     free(cpu->bus->rom->prg_rom);
     free(cpu->bus->rom->chr_rom);
@@ -72,9 +72,13 @@ void load(CPU *cpu, uint8_t program[], int program_length)
 {
     for (int i = 0; i < program_length; i++)
     {
-        mem_write(cpu, program[i], PROGRAM_START + i);
+        cpu->bus->rom->prg_rom[PROGRAM_START + i] = program[i];
     }
-    mem_write_u16(cpu, PROGRAM_START, PROGRAM_START_ADDR);
+    uint8_t low = PROGRAM_START & 0xFF;
+    uint8_t high = PROGRAM_START >> 8;
+    cpu->bus->rom->prg_rom[PROGRAM_START_ADDR] = low;
+    cpu->bus->rom->prg_rom[PROGRAM_START_ADDR] = high;
+
     cpu->program_counter = PROGRAM_START;
 }
 

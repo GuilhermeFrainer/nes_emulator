@@ -12,7 +12,6 @@ ROM *get_rom(char *file_path)
 {
     // Checks if file is a '.nes' file
     char *file_extension = strrchr(file_path, '.');
-    printf("Extension: %s\n", file_extension);
     if (strcmp(file_extension, ".nes") != 0)
     {
         fprintf(stderr, "Error: specified file isn't '.nes' file.\n");
