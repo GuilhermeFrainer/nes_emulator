@@ -180,13 +180,25 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
             break;
 
         case Absolute:
-            sprintf(
-                return_string,
-                "%s $%04X = %02X",
-                inst.mnemonic,
-                addr,
-                mem_read(cpu, addr)
-            );
+            if (inst.opcode == 0x4C || inst.opcode == 0x20)
+            {
+                sprintf(
+                    return_string,
+                    "%s $%04X",
+                    inst.mnemonic,
+                    addr
+                );
+            }
+            else
+            {
+                sprintf(
+                    return_string,
+                    "%s $%04X = %02X",
+                    inst.mnemonic,
+                    addr,
+                    mem_read(cpu, addr)
+                );
+            }
             break;
 
         case AbsoluteX:
