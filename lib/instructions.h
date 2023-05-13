@@ -28,7 +28,7 @@ typedef enum AddrMode
 typedef struct Instruction
 {
     uint8_t opcode;
-    char mnemonic[3];
+    char mnemonic[4];
     int bytes;
     int cycles;
     AddrMode mode;
