@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
     CPU *cpu = new_cpu(rom);
     populate_inst_list();
-    load(cpu, program, program_length);
+    load(cpu);
     reset(cpu);
     run(cpu, renderer, texture);
 

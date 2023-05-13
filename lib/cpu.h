@@ -63,7 +63,7 @@ void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr);
 
 // Running functions
 void reset(CPU *cpu);
-void load(CPU *cpu, uint8_t program[], int program_length);
+void load(CPU *cpu);
 void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture);
 void interpret(CPU *cpu, uint8_t opcode);
 

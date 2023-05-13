@@ -68,14 +68,11 @@ void reset(CPU *cpu)
     cpu->stack_pointer = STACK_RESET;
 }
 
-void load(CPU *cpu, uint8_t program[], int program_length)
+void load(CPU *cpu)
 {
-    for (int i = 0; i < program_length; i++)
-    {
-        cpu->bus->rom->prg_rom[PROGRAM_START + i] = program[i];
-    }
     uint8_t low = PROGRAM_START & 0xFF;
     uint8_t high = PROGRAM_START >> 8;
+    
     cpu->bus->rom->prg_rom[PROGRAM_START_ADDR] = low;
     cpu->bus->rom->prg_rom[PROGRAM_START_ADDR] = high;
 
@@ -462,6 +459,7 @@ void interpret(CPU *cpu, uint8_t opcode)
             break;
         
         default:
+            fprintf(stderr, "Attempted to run unknown opcode: %x\n", opcode);
             break;
     }
     if (!branch)
