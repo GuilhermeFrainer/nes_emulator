@@ -9,27 +9,15 @@
 
 #define NES_TEST_PATH "cartridges/nestest.nes"
 
-#define PROGRAM_COUNTER_LENGTH 4
-#define HEX_OPCODE_LENGTH 8
-#define ASSEMBLY_OPCODE_LENGTH 30
-#define CPU_REGS_LENGTH 25
-#define FINAL_SIZE PROGRAM_COUNTER_LENGTH + HEX_OPCODE_LENGTH \
-        + ASSEMBLY_OPCODE_LENGTH + CPU_REGS_LENGTH + 7 // 6 spaces + \n char
+#define LINE_LENGTH 75 // Takes the \n and \0 characters into account
+#define HEX_OPCODE_POSITION 4
+#define ASSEMBLY_OPCODE_POSITION 12
+#define CPU_REGS_POSITION 42
 
-
-typedef struct PrintString {
-    char program_counter[PROGRAM_COUNTER_LENGTH + 1];
-    char hex_opcode[HEX_OPCODE_LENGTH + 1];
-    char assembly_opcode[ASSEMBLY_OPCODE_LENGTH + 1];
-    char cpu_regs[CPU_REGS_LENGTH + 1];
-    // TODO:
-    // char clock_cycles[];
-} PrintString;
-
-PrintString new_print_string(CPU *cpu, Instruction inst, uint16_t original_pc);
-char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc);
+void write_line_string(char *line_string, CPU *cpu, Instruction inst);
+void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst);
 void run_and_log(CPU *cpu);
-void enter_log(CPU *cpu, FILE *file, Instruction inst, uint16_t original_pc);
+void enter_log(CPU *cpu, FILE *file, Instruction inst);
 
 int main(int argc, char **argv)
 {
@@ -51,31 +39,21 @@ int main(int argc, char **argv)
     return 0;
 }
 
-PrintString new_print_string(CPU *cpu, Instruction inst, uint16_t original_pc)
+void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 {
-    PrintString p_string;
+    // Initializes the string
+    memset(line_string, ' ', LINE_LENGTH);
+    line_string[LINE_LENGTH - 1] = '\0';
 
-    // Initialize all strings
-    memset(p_string.program_counter, ' ', PROGRAM_COUNTER_LENGTH);
-    memset(p_string.hex_opcode, ' ', HEX_OPCODE_LENGTH);
-    memset(p_string.assembly_opcode, ' ', ASSEMBLY_OPCODE_LENGTH);
-    memset(p_string.cpu_regs, ' ', CPU_REGS_LENGTH);
+    // Writes the program counter
+    sprintf(line_string, "%4X", cpu->program_counter);
 
-    // Assign null characters at the end of every string
-    p_string.program_counter[PROGRAM_COUNTER_LENGTH] = '\0';
-    p_string.hex_opcode[HEX_OPCODE_LENGTH] = '\0';
-    p_string.assembly_opcode[ASSEMBLY_OPCODE_LENGTH] = '\0';
-    p_string.cpu_regs[CPU_REGS_LENGTH] = '\0';
-
-    sprintf(p_string.program_counter, "%4X", cpu->program_counter);
-
-    // Works fine up to here
-
+    // Writes the hex opcode
     switch (inst.bytes)
     {
     case 2:
         sprintf(
-            p_string.hex_opcode,
+            &line_string[HEX_OPCODE_POSITION],
             "%02X %02X   ",
             inst.opcode,
             mem_read(cpu, cpu->program_counter + 1)
@@ -84,7 +62,7 @@ PrintString new_print_string(CPU *cpu, Instruction inst, uint16_t original_pc)
     
     case 3:
         sprintf(
-            p_string.hex_opcode,
+            &line_string[HEX_OPCODE_POSITION],
             "%02X %02X %02X",
             inst.opcode,
             mem_read(cpu, cpu->program_counter + 1),
@@ -94,24 +72,22 @@ PrintString new_print_string(CPU *cpu, Instruction inst, uint16_t original_pc)
 
     default:
         sprintf(
-            p_string.hex_opcode,
+            &line_string[HEX_OPCODE_POSITION],
             "%02X      ",
             inst.opcode
         );
         break;
     }
 
-    char *assembly_opcode = get_assembly_opcode(cpu, inst, original_pc);
-    if (assembly_opcode == NULL)
-    {
-        fprintf(stderr, "Something went wrong when trying to get the assembly opcode.\n");
-    }
+    // Writes the assembly opcode
+    // Must increment and then decrement the PC for it to work properly
+    cpu->program_counter++;
+    write_assembly_opcode(line_string, cpu, inst);
+    cpu->program_counter--;
 
-    strcpy(p_string.assembly_opcode, assembly_opcode);
-    free(assembly_opcode);
-
+    // Writes the cpu registers
     sprintf(
-        p_string.cpu_regs,
+        &line_string[CPU_REGS_POSITION],
         "A:%02X X:%02X Y:%02X P:%02X SP:%02X",
         cpu->reg_a,
         cpu->reg_x,
@@ -119,28 +95,19 @@ PrintString new_print_string(CPU *cpu, Instruction inst, uint16_t original_pc)
         cpu->status,
         cpu->stack_pointer
     );
-
-    return p_string;
 }
 
-char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
+void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
 {
-    // Done so 'get_operand_addr()' runs as expected
-    cpu->program_counter++;
     uint16_t addr = get_operand_addr(cpu, inst.mode);
-    
+
     uint8_t operand;
-    char *return_string  = malloc(sizeof(char) * (ASSEMBLY_OPCODE_LENGTH + 1));
-    if (return_string == NULL)
-    {
-        return NULL;
-    }
 
     switch (inst.mode)
     {
         case Immediate:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s #$%02X",
                 inst.mnemonic,
                 mem_read(cpu, addr)
@@ -149,7 +116,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case ZeroPage:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s $%02X = $%02X",
                 inst.mnemonic,
                 addr,
@@ -159,7 +126,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case ZeroPageX:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s $%02X,X @ %20X = %02X",
                 inst.mnemonic,
                 mem_read(cpu, cpu->program_counter),
@@ -170,7 +137,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case ZeroPageY:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s $%02X,Y @ %02X = %02X",
                 inst.mnemonic,
                 mem_read(cpu, cpu->program_counter),
@@ -183,7 +150,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
             if (inst.opcode == 0x4C || inst.opcode == 0x20)
             {
                 sprintf(
-                    return_string,
+                    &line_string[ASSEMBLY_OPCODE_POSITION],
                     "%s $%04X",
                     inst.mnemonic,
                     addr
@@ -192,7 +159,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
             else
             {
                 sprintf(
-                    return_string,
+                    &line_string[ASSEMBLY_OPCODE_POSITION],
                     "%s $%04X = %02X",
                     inst.mnemonic,
                     addr,
@@ -203,7 +170,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case AbsoluteX:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s $%04X,X @ %04X = %02X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -214,7 +181,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case AbsoluteY:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s $%04X,Y @ %04X = %02X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -225,7 +192,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
 
         case Indirect:
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s ($%04X) = %04X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -236,7 +203,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
         case IndirectX:
             operand = mem_read(cpu, cpu->program_counter);
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s ($%02X,X) @ %02X = %04X = %02X",
                 inst.mnemonic,
                 operand,
@@ -249,7 +216,7 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
         case IndirectY:
             operand = mem_read(cpu, cpu->program_counter);
             sprintf(
-                return_string,
+                &line_string[ASSEMBLY_OPCODE_POSITION],
                 "%s ($%02X),Y = %04X @ %04X = %02X",
                 inst.mnemonic,
                 operand,
@@ -260,44 +227,39 @@ char *get_assembly_opcode(CPU *cpu, Instruction inst, uint16_t original_pc)
             break;
 
         case Implied:
-            sprintf(return_string, "%s", inst.mnemonic);
+            sprintf(&line_string[ASSEMBLY_OPCODE_POSITION], "%s", inst.mnemonic);
             break;
     }
-    // Compensate previous incrementation
-    cpu->program_counter--;
 
-    int length = strlen(return_string);
-    memset(&return_string[length], ' ', ASSEMBLY_OPCODE_LENGTH - length);
-    
-    // Fill the remaining spaces with space characters and null-terminate the string
-    //for (int i = strlen(return_string); i < sizeof(return_string) - 1; i++)
-    //{
-    //    return_string[i] = 'a';
-    //}
-    return_string[ASSEMBLY_OPCODE_LENGTH] = '\0';
+    int assembly_opcode_start = strlen(&line_string[ASSEMBLY_OPCODE_POSITION]);
 
-    return return_string;
+    // Fills the rest of the assembly opcode area with spaces
+    for (int i = assembly_opcode_start; i < CPU_REGS_POSITION; i++)
+    {
+        line_string[i] = ' ';
+    }
+    return;
 }
 
 void run_and_log(CPU *cpu)
 {
-    FILE *file = fopen("my_log.log", "w");
+    FILE *file = fopen("tests/my_log.log", "w");
     if (file == NULL)
     {
-        fprintf(stderr, "Something went wrong while creating a file");
+        fprintf(stderr, "Something went wrong while creating a file\n");
         return;
     }
 
     while (1)
     {
         uint8_t opcode = mem_read(cpu, cpu->program_counter);
-        uint16_t original_pc = cpu->program_counter;
         Instruction inst = inst_list[opcode];
         
-        enter_log(cpu, file, inst, original_pc);
+        enter_log(cpu, file, inst);
         interpret(cpu, opcode);
         if (opcode == 0x00)
         {
+            printf("Breaking at %X\n", cpu->program_counter);
             break;
         }
     }
@@ -305,17 +267,10 @@ void run_and_log(CPU *cpu)
     fclose(file);
 }
 
-void enter_log(CPU *cpu, FILE *file, Instruction inst, uint16_t original_pc)
+void enter_log(CPU *cpu, FILE *file, Instruction inst)
 {
-    PrintString p_string = new_print_string(cpu, inst, original_pc);
-    char string_to_write[FINAL_SIZE + 1];
-    sprintf(
-        string_to_write,
-        "%s  %s  %s  %s\n", // Two spaces between each string
-        p_string.program_counter,
-        p_string.hex_opcode,
-        p_string.assembly_opcode,
-        p_string.cpu_regs
-    );
+    char string_to_write[LINE_LENGTH];
+    write_line_string(string_to_write, cpu, inst);
     fwrite(string_to_write, strlen(string_to_write), 1, file);
+    fflush(file);
 }
