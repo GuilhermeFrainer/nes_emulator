@@ -6,3 +6,4 @@ TODO.md
 bin/SDL2.dll
 cartridges
 cartridges/*
+my_log.log

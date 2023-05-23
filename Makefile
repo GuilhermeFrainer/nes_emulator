@@ -42,7 +42,7 @@ run: $(BIN)
 # TESTS
 TEST_REQS = $(CPUOBJS) $(TESTDIR)/test_framework.h $(BINDIR)
 CPUOBJS = $(OBJDIR)/cpu.o $(OBJDIR)/instructions.o $(OBJDIR)/bus.o $(OBJDIR)/io.o $(OBJDIR)/cartridge.o
-TESTFLAGS = -lmingw32 -lSDL2main -lSDL2
+TESTFLAGS = -lmingw32 -lSDL2main -lSDL2 -g -Wall
 
 test: $(BINDIR)/test_cpu $(BINDIR)/test_instructions
 

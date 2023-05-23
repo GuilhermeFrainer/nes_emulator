@@ -9,20 +9,16 @@
 
 #define NES_TEST_PATH "cartridges/nestest.nes"
 
-#define LINE_LENGTH 75 // Takes the \n and \0 characters into account
-#define HEX_OPCODE_POSITION 4
-#define ASSEMBLY_OPCODE_POSITION 12
-#define CPU_REGS_POSITION 42
+#define LINE_LENGTH 75
+#define CPU_REGS_POSITION 48
 
 void write_line_string(char *line_string, CPU *cpu, Instruction inst);
-void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst);
 void run_and_log(CPU *cpu);
 void enter_log(CPU *cpu, FILE *file, Instruction inst);
 
 int main(int argc, char **argv)
 {
-    char *file_path = NES_TEST_PATH;
-    ROM *rom = get_rom(file_path);
+    ROM *rom = get_rom(NES_TEST_PATH);
     if (rom == NULL)
     {
         return 1;
@@ -41,73 +37,60 @@ int main(int argc, char **argv)
 
 void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 {
-    // Initializes the string
-    memset(line_string, ' ', LINE_LENGTH);
-    line_string[LINE_LENGTH - 1] = '\0';
+    // Pointer to keep track of the last character
+    int last_char_position = 0;
 
-    // Writes the program counter
-    sprintf(line_string, "%4X", cpu->program_counter);
+    // Handles the program counter
+    last_char_position += sprintf(
+        line_string,
+        "%04X  ",
+        cpu->program_counter
+    );
 
-    // Writes the hex opcode
+    // Handles the hex opcode
     switch (inst.bytes)
     {
-    case 2:
-        sprintf(
-            &line_string[HEX_OPCODE_POSITION],
-            "%02X %02X   ",
-            inst.opcode,
-            mem_read(cpu, cpu->program_counter + 1)
-        );
-        break;
+        case 3:
+            last_char_position += sprintf(
+                line_string + last_char_position,
+                "%02X  %02X  %02X  ",
+                inst.opcode,
+                mem_read(cpu, cpu->program_counter + 1),
+                mem_read(cpu, cpu->program_counter + 2)
+            );
+            break;
     
-    case 3:
-        sprintf(
-            &line_string[HEX_OPCODE_POSITION],
-            "%02X %02X %02X",
-            inst.opcode,
-            mem_read(cpu, cpu->program_counter + 1),
-            mem_read(cpu, cpu->program_counter + 2)
-        );
-        break;
+        case 2:
+            last_char_position += sprintf(
+                line_string + last_char_position,
+                "%02X  %02X      ",
+                inst.opcode,
+                mem_read(cpu, cpu->program_counter + 1)
+            );
+            break;
 
-    default:
-        sprintf(
-            &line_string[HEX_OPCODE_POSITION],
-            "%02X      ",
-            inst.opcode
-        );
-        break;
+        default:
+            last_char_position += sprintf(
+                line_string + last_char_position,
+                "%02X          ",
+                inst.opcode
+            );
+            break;
     }
 
-    // Writes the assembly opcode
-    // Must increment and then decrement the PC for it to work properly
+    // Handles the assembly opcode
+    // Must increment the program counter and decrement it later for this to work properly
     cpu->program_counter++;
-    write_assembly_opcode(line_string, cpu, inst);
-    cpu->program_counter--;
-
-    // Writes the cpu registers
-    sprintf(
-        &line_string[CPU_REGS_POSITION],
-        "A:%02X X:%02X Y:%02X P:%02X SP:%02X",
-        cpu->reg_a,
-        cpu->reg_x,
-        cpu->reg_y,
-        cpu->status,
-        cpu->stack_pointer
-    );
-}
-
-void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
-{
     uint16_t addr = get_operand_addr(cpu, inst.mode);
+    cpu->program_counter--;
 
     uint8_t operand;
 
     switch (inst.mode)
     {
         case Immediate:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s #$%02X",
                 inst.mnemonic,
                 mem_read(cpu, addr)
@@ -115,8 +98,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case ZeroPage:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s $%02X = $%02X",
                 inst.mnemonic,
                 addr,
@@ -125,8 +108,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case ZeroPageX:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s $%02X,X @ %20X = %02X",
                 inst.mnemonic,
                 mem_read(cpu, cpu->program_counter),
@@ -136,8 +119,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case ZeroPageY:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s $%02X,Y @ %02X = %02X",
                 inst.mnemonic,
                 mem_read(cpu, cpu->program_counter),
@@ -149,8 +132,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
         case Absolute:
             if (inst.opcode == 0x4C || inst.opcode == 0x20)
             {
-                sprintf(
-                    &line_string[ASSEMBLY_OPCODE_POSITION],
+                last_char_position += sprintf(
+                    line_string + last_char_position,
                     "%s $%04X",
                     inst.mnemonic,
                     addr
@@ -158,8 +141,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             }
             else
             {
-                sprintf(
-                    &line_string[ASSEMBLY_OPCODE_POSITION],
+                last_char_position += sprintf(
+                    line_string + last_char_position,
                     "%s $%04X = %02X",
                     inst.mnemonic,
                     addr,
@@ -169,8 +152,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case AbsoluteX:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s $%04X,X @ %04X = %02X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -180,8 +163,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case AbsoluteY:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s $%04X,Y @ %04X = %02X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -191,8 +174,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case Indirect:
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s ($%04X) = %04X",
                 inst.mnemonic,
                 mem_read_u16(cpu, cpu->program_counter),
@@ -202,8 +185,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
 
         case IndirectX:
             operand = mem_read(cpu, cpu->program_counter);
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s ($%02X,X) @ %02X = %04X = %02X",
                 inst.mnemonic,
                 operand,
@@ -215,8 +198,8 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
 
         case IndirectY:
             operand = mem_read(cpu, cpu->program_counter);
-            sprintf(
-                &line_string[ASSEMBLY_OPCODE_POSITION],
+            last_char_position += sprintf(
+                line_string + last_char_position,
                 "%s ($%02X),Y = %04X @ %04X = %02X",
                 inst.mnemonic,
                 operand,
@@ -227,17 +210,33 @@ void write_assembly_opcode(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case Implied:
-            sprintf(&line_string[ASSEMBLY_OPCODE_POSITION], "%s", inst.mnemonic);
+            last_char_position += sprintf(line_string + last_char_position, "%s", inst.mnemonic);
             break;
     }
 
-    int assembly_opcode_start = strlen(&line_string[ASSEMBLY_OPCODE_POSITION]);
 
     // Fills the rest of the assembly opcode area with spaces
-    for (int i = assembly_opcode_start; i < CPU_REGS_POSITION; i++)
+    for (; last_char_position < CPU_REGS_POSITION; last_char_position++)
     {
-        line_string[i] = ' ';
+        line_string[last_char_position] = ' ';
     }
+
+    // Handles the CPU registers
+    last_char_position += sprintf(
+        line_string + last_char_position,
+        "A:%02X X:%02X Y:%02X P:%02X SP:%02X",
+        cpu->reg_a,
+        cpu->reg_x,
+        cpu->reg_y,
+        cpu->status,
+        cpu->stack_pointer
+    );
+
+    sprintf(
+        line_string + last_char_position,
+        "\n"
+    );
+
     return;
 }
 
@@ -271,6 +270,5 @@ void enter_log(CPU *cpu, FILE *file, Instruction inst)
 {
     char string_to_write[LINE_LENGTH];
     write_line_string(string_to_write, cpu, inst);
-    fwrite(string_to_write, strlen(string_to_write), 1, file);
-    fflush(file);
+    fwrite(string_to_write, strlen(string_to_write) * sizeof(char), 1, file);
 }
