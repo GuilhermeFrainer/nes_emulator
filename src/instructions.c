@@ -233,7 +233,7 @@ void adc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = mem_read(cpu, addr);
-    add_with_carry(cpu, operand, true);
+    add_with_carry(cpu, operand);
 }
 
 void and(CPU *cpu, AddrMode mode)
@@ -545,9 +545,11 @@ void pha(CPU *cpu)
 
 void php(CPU *cpu)
 {
+    uint8_t old_status_register = cpu->status;
     set_flag(cpu, BREAK_FLAG_0);
+    set_flag(cpu, BREAK_FLAG_1);
     stack_push(cpu, cpu->status);
-    unset_flag(cpu, BREAK_FLAG_0);
+    cpu->status = old_status_register;
 }
 
 // Pull instructions
@@ -561,6 +563,8 @@ void pla(CPU *cpu)
 void plp(CPU *cpu)
 {
     cpu->status = stack_pull(cpu);
+    unset_flag(cpu, BREAK_FLAG_0); // This flag is ignored by this instruction
+    set_flag(cpu, BREAK_FLAG_1); // This flag must always be set
 }
 
 // Rotate instructions
@@ -662,8 +666,8 @@ void sbc(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t operand = mem_read(cpu, addr);
-    operand = ~operand + 1;
-    add_with_carry(cpu, operand, false);
+    // Must be the one's complement, not the two's
+    add_with_carry(cpu, ~operand);
 }
 
 // Set flag instructions
@@ -820,17 +824,11 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
 }
 
 // Made to implement both ADC and SBC more easily
-void add_with_carry(CPU *cpu, uint8_t operand, bool addition)
+void add_with_carry(CPU *cpu, uint8_t operand)
 {
     uint8_t carry_in = is_set(cpu, CARRY_FLAG);
-    if (!addition)
-    {
-        carry_in = ~carry_in;
-        carry_in <<= 7;
-        carry_in >>= 7;
-    }
     uint16_t sum = (uint16_t) cpu->reg_a + operand + carry_in;
-
+    
     // Check if carry flag must be set
     if (sum > 0xFF)
     {
