@@ -545,7 +545,9 @@ void pha(CPU *cpu)
 
 void php(CPU *cpu)
 {
+    set_flag(cpu, BREAK_FLAG_0);
     stack_push(cpu, cpu->status);
+    unset_flag(cpu, BREAK_FLAG_0);
 }
 
 // Pull instructions
