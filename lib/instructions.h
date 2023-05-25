@@ -22,7 +22,9 @@ typedef enum AddrMode
     IndirectX,
     IndirectY,
 
-    Implied
+    Implied,
+
+    Relative
 } AddrMode;
 
 typedef struct Instruction

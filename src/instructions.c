@@ -44,23 +44,23 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         case 0x1E: inst = (Instruction) {0x1E, "ASL\0", 3, 7, AbsoluteX}; return inst;
 
         // Branch instructions part 1
-        case 0x90: inst = (Instruction) {0x90, "BCC\0", 2, 2, Implied}; return inst;
-        case 0xB0: inst = (Instruction) {0xB0, "BCS\0", 2, 2, Implied}; return inst;
-        case 0xF0: inst = (Instruction) {0xF0, "BEQ\0", 2, 2, Implied}; return inst;
+        case 0x90: inst = (Instruction) {0x90, "BCC\0", 2, 2, Relative}; return inst;
+        case 0xB0: inst = (Instruction) {0xB0, "BCS\0", 2, 2, Relative}; return inst;
+        case 0xF0: inst = (Instruction) {0xF0, "BEQ\0", 2, 2, Relative}; return inst;
 
         case 0x24: inst = (Instruction) {0x24, "BIT\0", 2, 3, ZeroPage}; return inst;
         case 0x2C: inst = (Instruction) {0x2C, "BIT\0", 3, 4, Absolute}; return inst;
 
         // Branch instructions part 2
-        case 0x30: inst = (Instruction) {0x30, "BMI\0", 2, 2, Implied}; return inst;
-        case 0xD0: inst = (Instruction) {0xD0, "BNE\0", 2, 2, Implied}; return inst;
-        case 0x10: inst = (Instruction) {0x10, "BPL\0", 2, 2, Implied}; return inst;
+        case 0x30: inst = (Instruction) {0x30, "BMI\0", 2, 2, Relative}; return inst;
+        case 0xD0: inst = (Instruction) {0xD0, "BNE\0", 2, 2, Relative}; return inst;
+        case 0x10: inst = (Instruction) {0x10, "BPL\0", 2, 2, Relative}; return inst;
 
         case 0x00: inst = (Instruction) {0x00, "BRK\0", 1, 7, Implied}; return inst;
 
         // Branch instructions part 3
-        case 0x50: inst = (Instruction) {0x50, "BVC\0", 2, 2, Implied}; return inst;
-        case 0x70: inst = (Instruction) {0x70, "BVS\0", 2, 2, Implied}; return inst;
+        case 0x50: inst = (Instruction) {0x50, "BVC\0", 2, 2, Relative}; return inst;
+        case 0x70: inst = (Instruction) {0x70, "BVS\0", 2, 2, Relative}; return inst;
 
         // Clear instructions
         case 0x18: inst = (Instruction) {0x18, "CLC\0", 1, 2, Implied}; return inst;

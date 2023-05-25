@@ -25,7 +25,6 @@ int main(int argc, char **argv)
     }
     CPU *cpu = new_cpu(rom);
     populate_inst_list();
-    //load(cpu);
     reset(cpu);
     cpu->program_counter = 0xC000;
 
@@ -53,7 +52,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
         case 3:
             last_char_position += sprintf(
                 line_string + last_char_position,
-                "%02X  %02X  %02X  ",
+                "%02X %02X %02X  ",
                 inst.opcode,
                 mem_read(cpu, cpu->program_counter + 1),
                 mem_read(cpu, cpu->program_counter + 2)
@@ -63,7 +62,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
         case 2:
             last_char_position += sprintf(
                 line_string + last_char_position,
-                "%02X  %02X      ",
+                "%02X %02X     ",
                 inst.opcode,
                 mem_read(cpu, cpu->program_counter + 1)
             );
@@ -72,7 +71,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
         default:
             last_char_position += sprintf(
                 line_string + last_char_position,
-                "%02X          ",
+                "%02X        ",
                 inst.opcode
             );
             break;
@@ -100,7 +99,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
         case ZeroPage:
             last_char_position += sprintf(
                 line_string + last_char_position,
-                "%s $%02X = $%02X",
+                "%s $%02X = %02X",
                 inst.mnemonic,
                 addr,
                 mem_read(cpu, addr)
@@ -211,6 +210,15 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 
         case Implied:
             last_char_position += sprintf(line_string + last_char_position, "%s", inst.mnemonic);
+            break;
+
+        case Relative:
+            last_char_position += sprintf(
+                line_string + last_char_position,
+                "%s $%04X",
+                inst.mnemonic,
+                cpu->program_counter + mem_read(cpu, cpu->program_counter + 1) + inst.bytes
+            );
             break;
     }
 
