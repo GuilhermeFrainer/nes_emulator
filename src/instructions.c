@@ -572,10 +572,10 @@ void plp(CPU *cpu)
 void rol_acc(CPU *cpu)
 {
     uint8_t old_acc = cpu->reg_a;
-    cpu->reg_a <<= 1;
+    set_reg_a(cpu, cpu->reg_a << 1);
     if (is_set(cpu, CARRY_FLAG))
     {
-        cpu->reg_a |= 0x01;
+        set_reg_a(cpu, cpu->reg_a | 0x01);
     }
     
     if ((old_acc & 0x80) != 0)
@@ -606,15 +606,16 @@ void rol(CPU *cpu, AddrMode mode)
         unset_flag(cpu, CARRY_FLAG);
     }
     mem_write(cpu, new_value, addr);
+    update_zero_and_negative_flags(cpu, new_value);
 }
 
 void ror_acc(CPU *cpu)
 {
     uint8_t old_acc = cpu->reg_a;
-    cpu->reg_a >>= 1;
+    set_reg_a(cpu, cpu->reg_a >> 1);
     if (is_set(cpu, CARRY_FLAG))
     {
-        cpu->reg_a |= 0x80;
+        set_reg_a(cpu, cpu->reg_a | 0x80);
     }
     if ((old_acc & 0x01) != 0)
     {
@@ -644,6 +645,7 @@ void ror(CPU *cpu, AddrMode mode)
         unset_flag(cpu, CARRY_FLAG);
     }
     mem_write(cpu, new_value, addr);
+    update_zero_and_negative_flags(cpu, new_value);
 }
 
 // Return instructions
@@ -653,6 +655,9 @@ void rti(CPU *cpu)
     uint8_t flags = stack_pull(cpu);
     uint16_t program_counter = stack_pull_u16(cpu);
     cpu->status = flags;
+    // "Disregards" bits 5 and 4, which means 5 is set and 4 isn't
+    set_flag(cpu, BREAK_FLAG_1);
+    unset_flag(cpu, BREAK_FLAG_0);
     cpu->program_counter = program_counter;
 }
 

@@ -183,20 +183,20 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case IndirectX:
-            operand = mem_read(cpu, cpu->program_counter);
+            operand = mem_read(cpu, cpu->program_counter + 1);
             last_char_position += sprintf(
                 line_string + last_char_position,
                 "%s ($%02X,X) @ %02X = %04X = %02X",
                 inst.mnemonic,
                 operand,
-                (int8_t) operand + cpu->reg_x,
+                operand + cpu->reg_x,
                 addr,
                 mem_read(cpu, addr)
             );
             break;
 
         case IndirectY:
-            operand = mem_read(cpu, cpu->program_counter);
+            operand = mem_read(cpu, cpu->program_counter + 1);
             last_char_position += sprintf(
                 line_string + last_char_position,
                 "%s ($%02X),Y = %04X @ %04X = %02X",
@@ -209,7 +209,28 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case Implied:
-            last_char_position += sprintf(line_string + last_char_position, "%s", inst.mnemonic);
+            switch (inst.opcode)
+            {
+                // Handles accumulator instructions
+                case 0x0A:
+                case 0x4A:
+                case 0x2A:
+                case 0x6A:
+                    last_char_position += sprintf(
+                        line_string + last_char_position,
+                        "%s A",
+                        inst.mnemonic
+                    );
+                    break;
+                
+                default:
+                    last_char_position += sprintf(
+                        line_string + last_char_position,
+                        "%s",
+                        inst.mnemonic
+                    );
+                    break;
+            }
             break;
 
         case Relative:
