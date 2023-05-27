@@ -819,7 +819,12 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             return mem_read_u16(cpu, base_u16);
         case IndirectX:
             uint8_t base_x = mem_read(cpu, cpu->program_counter);
-            return mem_read_u16(cpu, base_x + cpu->reg_x);
+            base_x += cpu->reg_x;
+            uint8_t low_x = mem_read(cpu, base_x);
+            base_x++;
+            uint8_t high_x = mem_read(cpu, base_x);
+            return  (uint16_t) high_x << 8 | low_x;
+            // return mem_read_u16(cpu, base_x + cpu->reg_x);
         case IndirectY:
             uint8_t base_y = mem_read(cpu, cpu->program_counter);
             return mem_read_u16(cpu, base_y) + cpu->reg_y;

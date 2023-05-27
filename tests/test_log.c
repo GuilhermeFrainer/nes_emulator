@@ -189,7 +189,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 "%s ($%02X,X) @ %02X = %04X = %02X",
                 inst.mnemonic,
                 operand,
-                operand + cpu->reg_x,
+                (uint8_t) (operand + cpu->reg_x),
                 addr,
                 mem_read(cpu, addr)
             );

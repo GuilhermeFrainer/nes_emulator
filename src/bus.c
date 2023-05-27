@@ -24,7 +24,7 @@ uint8_t bus_mem_read(Bus *bus, uint16_t addr)
         return bus->ram[addr];
     }
     // PRG ROM
-    if (addr >= PRG_ROM_START && addr <= PRG_ROM_MIRROR_END)
+    else if (addr >= PRG_ROM_START && addr <= PRG_ROM_MIRROR_END)
     {
         addr -= PRG_ROM_START;
         // Mirror if needed
