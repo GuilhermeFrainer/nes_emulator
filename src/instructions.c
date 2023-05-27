@@ -253,8 +253,10 @@ void asl(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
     uint8_t value = mem_read(cpu, addr);
-    mem_write(cpu, value, addr);
     update_carry_flag(cpu, value);
+    value <<= 1;
+    mem_write(cpu, value, addr);
+    update_zero_and_negative_flags(cpu, value);
 }
 
 // Branch instructions part 1
