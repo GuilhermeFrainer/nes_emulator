@@ -809,16 +809,26 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
         case Immediate: return cpu->program_counter;
 
         case ZeroPage: return mem_read(cpu, cpu->program_counter);
-        case ZeroPageX: return mem_read(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
-        case ZeroPageY: return mem_read(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
+        case ZeroPageX: return (uint8_t) (mem_read(cpu, cpu->program_counter) + cpu->reg_x);
+        case ZeroPageY: return (uint8_t) (mem_read(cpu, cpu->program_counter) + cpu->reg_y);
 
         case Absolute: return mem_read_u16(cpu, cpu->program_counter);
-        case AbsoluteX: return mem_read_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_x;
-        case AbsoluteY: return mem_read_u16(cpu, cpu->program_counter) + (int8_t) cpu->reg_y;
+        case AbsoluteX: return mem_read_u16(cpu, cpu->program_counter) + cpu->reg_x;
+        case AbsoluteY: return mem_read_u16(cpu, cpu->program_counter) +  cpu->reg_y;
 
+        // Indirect addressing modes wrap around if the address falls on a page boundary
         case Indirect:
             uint16_t base_u16 = mem_read_u16(cpu, cpu->program_counter);
-            return mem_read_u16(cpu, base_u16);
+            if ((base_u16 & 0xFF) == 0xFF)
+            {
+                uint8_t low = mem_read(cpu, base_u16);
+                uint8_t high = mem_read(cpu, base_u16 & 0xFF00);
+                return (uint16_t) high << 8 | low;
+            }
+            else
+            {
+                return mem_read_u16(cpu, base_u16);
+            }
         case IndirectX:
             uint8_t base_x = mem_read(cpu, cpu->program_counter);
             base_x += cpu->reg_x;

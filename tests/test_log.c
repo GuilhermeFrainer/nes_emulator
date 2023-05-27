@@ -109,9 +109,9 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
         case ZeroPageX:
             last_char_position += sprintf(
                 line_string + last_char_position,
-                "%s $%02X,X @ %20X = %02X",
+                "%s $%02X,X @ %02X = %02X",
                 inst.mnemonic,
-                mem_read(cpu, cpu->program_counter),
+                mem_read(cpu, cpu->program_counter + 1),
                 addr,
                 mem_read(cpu, addr)
             );
@@ -122,7 +122,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 line_string + last_char_position,
                 "%s $%02X,Y @ %02X = %02X",
                 inst.mnemonic,
-                mem_read(cpu, cpu->program_counter),
+                mem_read(cpu, cpu->program_counter + 1),
                 addr,
                 mem_read(cpu, addr)
             );
@@ -155,7 +155,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 line_string + last_char_position,
                 "%s $%04X,X @ %04X = %02X",
                 inst.mnemonic,
-                mem_read_u16(cpu, cpu->program_counter),
+                mem_read_u16(cpu, cpu->program_counter + 1),
                 addr,
                 mem_read(cpu, addr)
             );
@@ -166,7 +166,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 line_string + last_char_position,
                 "%s $%04X,Y @ %04X = %02X",
                 inst.mnemonic,
-                mem_read_u16(cpu, cpu->program_counter),
+                mem_read_u16(cpu, cpu->program_counter + 1),
                 addr,
                 mem_read(cpu, addr)
             );
@@ -177,7 +177,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 line_string + last_char_position,
                 "%s ($%04X) = %04X",
                 inst.mnemonic,
-                mem_read_u16(cpu, cpu->program_counter),
+                mem_read_u16(cpu, cpu->program_counter + 1),
                 addr
             );
             break;
