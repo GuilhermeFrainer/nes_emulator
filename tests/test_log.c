@@ -197,12 +197,16 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 
         case IndirectY:
             operand = mem_read(cpu, cpu->program_counter + 1);
+            uint8_t low = mem_read(cpu, operand);
+            uint8_t high = mem_read(cpu, (uint8_t) (operand + 1));
+            uint16_t resulting_addr = high << 8 | low;
+
             last_char_position += sprintf(
                 line_string + last_char_position,
                 "%s ($%02X),Y = %04X @ %04X = %02X",
                 inst.mnemonic,
                 operand,
-                mem_read_u16(cpu, operand),
+                resulting_addr,
                 addr,
                 mem_read(cpu, addr)
             );
