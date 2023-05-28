@@ -85,6 +85,12 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 
     uint8_t operand;
 
+    // Creates space for unofficial opcodes' * character
+    if (strlen(inst.mnemonic) == 4)
+    {
+        last_char_position--;
+    }
+
     switch (inst.mode)
     {
         case Immediate:
@@ -242,7 +248,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                 line_string + last_char_position,
                 "%s $%04X",
                 inst.mnemonic,
-                cpu->program_counter + mem_read(cpu, cpu->program_counter + 1) + inst.bytes
+                cpu->program_counter + 2 + (int8_t) mem_read(cpu, cpu->program_counter + 1)
             );
             break;
     }

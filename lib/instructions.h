@@ -30,13 +30,13 @@ typedef enum AddrMode
 typedef struct Instruction
 {
     uint8_t opcode;
-    char mnemonic[4];
+    char mnemonic[5];
     int bytes;
     int cycles;
     AddrMode mode;
 } Instruction;
 
-extern Instruction inst_list[0xFF];
+extern Instruction inst_list[0x100];
 
 void populate_inst_list(void);
 Instruction get_instruction_from_opcode(uint8_t opcode);
@@ -141,6 +141,24 @@ void tsx(CPU *cpu);
 void txa(CPU *cpu);
 void txs(CPU *cpu);
 void tya(CPU *cpu);
+
+// Unofficial opcodes
+
+void dcp(CPU *cpu, AddrMode mode);
+
+void isb(CPU *cpu, AddrMode mode);
+
+void lax(CPU *cpu, AddrMode mode);
+
+// Rotate instructions
+void rla(CPU *cpu, AddrMode mode);
+void rra(CPU *cpu, AddrMode mode);
+
+void sax(CPU *cpu, AddrMode mode);
+
+// Shift instructions
+void slo(CPU *cpu, AddrMode mode);
+void sre(CPU *cpu, AddrMode mode);
 
 // End instructions
 

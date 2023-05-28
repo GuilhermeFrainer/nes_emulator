@@ -457,6 +457,123 @@ void interpret(CPU *cpu, uint8_t opcode)
         case 0x98:
             tya(cpu);
             break;
+
+        // Unofficial opcodes
+
+        case 0xC7:
+		case 0xD7:
+		case 0xCF:
+		case 0xDF:
+		case 0xDB:
+		case 0xC3:
+		case 0xD3:
+            dcp(cpu, inst.mode);
+            break;
+
+        case 0x82:
+		case 0x89:
+		case 0xC2:
+		case 0xE2:
+		case 0x80:
+        case 0x04:
+        case 0x44:
+        case 0x64:
+        case 0x14:
+		case 0x34:
+		case 0x54:
+		case 0x74:
+		case 0xD4:
+		case 0xF4:
+            // DOP (Double NOP)
+            break;
+
+        case 0xE7:
+		case 0xF7:
+		case 0xEF:
+		case 0xFF:
+		case 0xFB:
+		case 0xE3:
+		case 0xF3:
+            isb(cpu, inst.mode);
+            break;
+
+        case 0xA7:
+        case 0xB7:
+        case 0xAF:
+        case 0xBF:
+        case 0xA3:
+        case 0xB3:
+            lax(cpu, inst.mode);
+            break;
+
+        case 0x1A:
+		case 0x3A:
+		case 0x5A:
+		case 0x7A:
+		case 0xDA:
+		case 0xFA:
+            // NOP
+            break;
+
+        case 0x67:
+		case 0x77:
+		case 0x6F:
+		case 0x7F:
+		case 0x7B:
+		case 0x63:
+		case 0x73:
+            rra(cpu, inst.mode);
+            break;
+
+        case 0x27:
+		case 0x37:
+		case 0x2F:
+		case 0x3F:
+		case 0x3B:
+		case 0x23:
+		case 0x33:
+            rla(cpu, inst.mode);
+            break;
+
+        case 0x87:
+        case 0x97:
+        case 0x8F:
+        case 0x83:
+            sax(cpu, inst.mode);
+            break;
+
+        case 0xEB:
+            sbc(cpu, inst.mode);
+            break;
+
+        case 0x07:
+		case 0x17:
+		case 0x0F:
+		case 0x1F:
+		case 0x1B:
+		case 0x03:
+		case 0x13:
+            slo(cpu, inst.mode);
+            break;
+
+        case 0x47:
+		case 0x57:
+		case 0x4F:
+		case 0x5F:
+		case 0x5B:
+		case 0x43:
+		case 0x53:
+            sre(cpu, inst.mode);
+            break;
+
+        case 0x1C:
+		case 0x3C:
+		case 0x5C:
+		case 0x7C:
+		case 0xDC:
+		case 0xFC:
+            // TOP (Triple NOP)
+            break;
         
         default:
             fprintf(stderr, "Attempted to run unknown opcode: %x\n", opcode);

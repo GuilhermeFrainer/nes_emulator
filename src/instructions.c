@@ -1,11 +1,11 @@
 #include "../lib/instructions.h"
 #include "../lib/cpu.h"
 
-Instruction inst_list[0xFF];
+Instruction inst_list[0x100];
 
 void populate_inst_list(void)
 {
-    for (int i = 0x00; i < 0xFF; i++)
+    for (int i = 0x00; i < 0x100; i++)
     {
         inst_list[i] = get_instruction_from_opcode(i);
     }
@@ -222,6 +222,113 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         case 0x8A: inst = (Instruction) {0x8A, "TXA\0", 1, 2, Implied}; return inst;
         case 0x9A: inst = (Instruction) {0x9A, "TXS\0", 1, 2, Implied}; return inst;
         case 0x98: inst = (Instruction) {0x98, "TYA\0", 1, 2, Implied}; return inst;
+
+        // Unofficial opcodes
+
+        // DCP: Decrement memory and compare with accumulator
+        case 0xC7: inst = (Instruction) {0xC7, "*DCP\0", 2, 5, ZeroPage}; return inst;
+		case 0xD7: inst = (Instruction) {0xD7, "*DCP\0", 2, 6, ZeroPageX}; return inst;
+		case 0xCF: inst = (Instruction) {0xCF, "*DCP\0", 3, 6, Absolute}; return inst;
+		case 0xDF: inst = (Instruction) {0xDF, "*DCP\0", 3, 7, AbsoluteX}; return inst;
+		case 0xDB: inst = (Instruction) {0xDB, "*DCP\0", 3, 7, AbsoluteY}; return inst;
+		case 0xC3: inst = (Instruction) {0xC3, "*DCP\0", 2, 8, IndirectX}; return inst;
+		case 0xD3: inst = (Instruction) {0xD3, "*DCP\0", 2, 8, IndirectY}; return inst;
+
+        // DOP (NOP) -> Double NOP
+        case 0x80: inst = (Instruction) {0x80, "*NOP\0", 2, 2, Immediate}; return inst;
+		case 0x82: inst = (Instruction) {0x82, "*NOP\0", 2, 2, Immediate}; return inst;
+		case 0x89: inst = (Instruction) {0x89, "*NOP\0", 2, 2, Immediate}; return inst;
+		case 0xC2: inst = (Instruction) {0xC2, "*NOP\0", 2, 2, Immediate}; return inst;
+		case 0xE2: inst = (Instruction) {0xE2, "*NOP\0", 2, 2, Immediate}; return inst;
+        case 0x04: inst = (Instruction) {0x04, "*NOP\0", 2, 3, ZeroPage}; return inst;
+        case 0x44: inst = (Instruction) {0x44, "*NOP\0", 2, 3, ZeroPage}; return inst;
+        case 0x64: inst = (Instruction) {0x64, "*NOP\0", 2, 3, ZeroPage}; return inst;
+        case 0x14: inst = (Instruction) {0x14, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+		case 0x34: inst = (Instruction) {0x34, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+		case 0x54: inst = (Instruction) {0x54, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+		case 0x74: inst = (Instruction) {0x74, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+		case 0xD4: inst = (Instruction) {0xD4, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+		case 0xF4: inst = (Instruction) {0xF4, "*NOP\0", 2, 4, ZeroPageX}; return inst;
+
+        // ISB: Increment memory then subtract it from accumulator
+        case 0xE7: inst = (Instruction) {0xE7, "*ISB\0", 2, 5, ZeroPage}; return inst;
+		case 0xF7: inst = (Instruction) {0xF7, "*ISB\0", 2, 6, ZeroPageX}; return inst;
+		case 0xEF: inst = (Instruction) {0xEF, "*ISB\0", 3, 6, Absolute}; return inst;
+		case 0xFF: inst = (Instruction) {0xFF, "*ISB\0", 3, 7, AbsoluteX}; return inst;
+		case 0xFB: inst = (Instruction) {0xFB, "*ISB\0", 3, 7, AbsoluteY}; return inst;
+		case 0xE3: inst = (Instruction) {0xE3, "*ISB\0", 2, 8, IndirectX}; return inst;
+		case 0xF3: inst = (Instruction) {0xF3, "*ISB\0", 2, 8, IndirectY}; return inst;
+
+        // LAX: Load accumulator and X register
+        case 0xA7: inst = (Instruction) {0xA7, "*LAX\0", 2, 3, ZeroPage}; return inst;
+        case 0xB7: inst = (Instruction) {0xB7, "*LAX\0", 2, 4, ZeroPageY}; return inst;
+        case 0xAF: inst = (Instruction) {0xAF, "*LAX\0", 3, 4, Absolute}; return inst;
+        case 0xBF: inst = (Instruction) {0xBF, "*LAX\0", 3, 4, AbsoluteY}; return inst;
+        case 0xA3: inst = (Instruction) {0xA3, "*LAX\0", 2, 6, IndirectX}; return inst;
+        case 0xB3: inst = (Instruction) {0xB3, "*LAX\0", 2, 5, IndirectY}; return inst;
+
+        // NOP
+        case 0x1A: inst = (Instruction) {0x1A, "*NOP\0", 1, 2, Implied}; return inst;
+		case 0x3A: inst = (Instruction) {0x3A, "*NOP\0", 1, 2, Implied}; return inst;
+		case 0x5A: inst = (Instruction) {0x5A, "*NOP\0", 1, 2, Implied}; return inst;
+		case 0x7A: inst = (Instruction) {0x7A, "*NOP\0", 1, 2, Implied}; return inst;
+		case 0xDA: inst = (Instruction) {0xDA, "*NOP\0", 1, 2, Implied}; return inst;
+		case 0xFA: inst = (Instruction) {0xFA, "*NOP\0", 1, 2, Implied}; return inst;
+
+        // RLA: Rotate left then AND with accumulator
+        case 0x27: inst = (Instruction) {0x27, "*RLA\0", 2, 5, ZeroPage}; return inst;
+		case 0x37: inst = (Instruction) {0x37, "*RLA\0", 2, 6, ZeroPageX}; return inst;
+		case 0x2F: inst = (Instruction) {0x2F, "*RLA\0", 3, 6, Absolute}; return inst;
+		case 0x3F: inst = (Instruction) {0x3F, "*RLA\0", 3, 7, AbsoluteX}; return inst;
+		case 0x3B: inst = (Instruction) {0x3B, "*RLA\0", 3, 7, AbsoluteY}; return inst;
+		case 0x23: inst = (Instruction) {0x23, "*RLA\0", 2, 8, IndirectX}; return inst;
+		case 0x33: inst = (Instruction) {0x33, "*RLA\0", 2, 8, IndirectY}; return inst;
+
+        // RRA: Rotate right then add to accumulator
+        case 0x67: inst = (Instruction) {0x67, "*RRA\0", 2, 5, ZeroPage}; return inst;
+		case 0x77: inst = (Instruction) {0x77, "*RRA\0", 2, 6, ZeroPageX}; return inst;
+		case 0x6F: inst = (Instruction) {0x6F, "*RRA\0", 3, 6, Absolute}; return inst;
+		case 0x7F: inst = (Instruction) {0x7F, "*RRA\0", 3, 7, AbsoluteX}; return inst;
+		case 0x7B: inst = (Instruction) {0x7B, "*RRA\0", 3, 7, AbsoluteY}; return inst;
+		case 0x63: inst = (Instruction) {0x63, "*RRA\0", 2, 8, IndirectX}; return inst;
+		case 0x73: inst = (Instruction) {0x73, "*RRA\0", 2, 8, IndirectY}; return inst;
+
+        // SAX: AND registers X and A and store the result at address
+        // Doesn't affect any flags
+        case 0x87: inst = (Instruction) {0x87, "*SAX\0", 2, 3, ZeroPage}; return inst;
+        case 0x97: inst = (Instruction) {0x97, "*SAX\0", 2, 4, ZeroPageY}; return inst;
+        case 0x8F: inst = (Instruction) {0x8F, "*SAX\0", 3, 4, Absolute}; return inst;
+        case 0x83: inst = (Instruction) {0x83, "*SAX\0", 2, 6, IndirectX}; return inst;
+
+        // Identical to official opcode 0xEB
+        case 0xEB: inst = (Instruction) {0xEB, "*SBC\0", 2, 2, Immediate}; return inst;
+
+        // SLO: Shift left and OR with accumulator
+        case 0x07: inst = (Instruction) {0x07, "*SLO\0", 2, 5, ZeroPage}; return inst;
+		case 0x17: inst = (Instruction) {0x17, "*SLO\0", 2, 6, ZeroPageX}; return inst;
+		case 0x0F: inst = (Instruction) {0x0F, "*SLO\0", 3, 6, Absolute}; return inst;
+		case 0x1F: inst = (Instruction) {0x1F, "*SLO\0", 3, 7, AbsoluteX}; return inst;
+		case 0x1B: inst = (Instruction) {0x1B, "*SLO\0", 3, 7, AbsoluteY}; return inst;
+		case 0x03: inst = (Instruction) {0x03, "*SLO\0", 2, 8, IndirectX}; return inst;
+		case 0x13: inst = (Instruction) {0x13, "*SLO\0", 2, 8, IndirectY}; return inst;
+
+        // SRE: Shift right then EOR with accumulator
+        case 0x47: inst = (Instruction) {0x47, "*SRE\0", 2, 5, ZeroPage}; return inst;
+		case 0x57: inst = (Instruction) {0x57, "*SRE\0", 2, 6, ZeroPageX}; return inst;
+		case 0x4F: inst = (Instruction) {0x4F, "*SRE\0", 3, 6, Absolute}; return inst;
+		case 0x5F: inst = (Instruction) {0x5F, "*SRE\0", 3, 7, AbsoluteX}; return inst;
+		case 0x5B: inst = (Instruction) {0x5B, "*SRE\0", 3, 7, AbsoluteY}; return inst;
+		case 0x43: inst = (Instruction) {0x43, "*SRE\0", 2, 8, IndirectX}; return inst;
+		case 0x53: inst = (Instruction) {0x53, "*SRE\0", 2, 8, IndirectY}; return inst;
+
+        // TOP -> Triple NOP
+        case 0x0C: inst = (Instruction) {0x0C, "*NOP\0", 3, 4, Absolute}; return inst;
+        case 0x1C: inst = (Instruction) {0x1C, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+		case 0x3C: inst = (Instruction) {0x3C, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+		case 0x5C: inst = (Instruction) {0x5C, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+		case 0x7C: inst = (Instruction) {0x7C, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+		case 0xDC: inst = (Instruction) {0xDC, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+		case 0xFC: inst = (Instruction) {0xFC, "*NOP\0", 3, 4, AbsoluteX}; return inst;
 
         default: inst = (Instruction) {0x00, "BRK\0", 1, 7, Implied}; return inst;
     }
@@ -744,6 +851,68 @@ void txs(CPU *cpu)
 void tya(CPU *cpu)
 {
     set_reg_a(cpu, cpu->reg_y);
+}
+
+// Unofficial opcodes
+
+void dcp(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = mem_read(cpu, addr);
+    operand--;
+    uint8_t compare_value = cpu->reg_a - operand;
+    update_zero_and_negative_flags(cpu, compare_value);
+    if (compare_value <= 0)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    // Just ignores the carry otherwise
+    mem_write(cpu, operand, addr);
+}
+
+void isb(CPU *cpu, AddrMode mode)
+{
+    inc(cpu, mode);
+    sbc(cpu, mode);
+}
+
+void lax(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t operand = mem_read(cpu, addr);
+    set_reg_a(cpu, operand);
+    set_reg_x(cpu, operand);
+}
+
+void rla(CPU *cpu, AddrMode mode)
+{
+    rol(cpu, mode);
+    and(cpu, mode);
+}
+
+void rra(CPU *cpu, AddrMode mode)
+{
+    ror(cpu, mode);
+    adc(cpu, mode);
+}
+
+void sax(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t result = cpu->reg_a & cpu->reg_x;
+    mem_write(cpu, result, addr);
+}
+
+void slo(CPU *cpu, AddrMode mode)
+{
+    asl(cpu, mode);
+    ora(cpu, mode);
+}
+
+void sre(CPU *cpu, AddrMode mode)
+{
+    lsr(cpu, mode);
+    eor(cpu, mode);
 }
 
 // End instructions
