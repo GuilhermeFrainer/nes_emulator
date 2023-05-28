@@ -144,11 +144,20 @@ void tya(CPU *cpu);
 
 // Unofficial opcodes
 
+// AND+ instructions
+void anc(CPU *cpu, AddrMode mode);
+void arr(CPU *cpu, AddrMode mode);
+void asr(CPU *cpu, AddrMode mode);
+
 void dcp(CPU *cpu, AddrMode mode);
 
 void isb(CPU *cpu, AddrMode mode);
 
+void lae(CPU *cpu, AddrMode mode);
+
 void lax(CPU *cpu, AddrMode mode);
+
+void lxa(CPU *cpu, AddrMode mode);
 
 // Rotate instructions
 void rla(CPU *cpu, AddrMode mode);
@@ -156,9 +165,20 @@ void rra(CPU *cpu, AddrMode mode);
 
 void sax(CPU *cpu, AddrMode mode);
 
+void sbx(CPU *cpu, AddrMode mode);
+
+void sha(CPU *cpu, AddrMode mode);
+
+// AND with high byte instructions
+void shs(CPU *cpu, AddrMode mode);
+void shx(CPU *cpu, AddrMode mode);
+void shy(CPU *cpu, AddrMode mode);
+
 // Shift instructions
 void slo(CPU *cpu, AddrMode mode);
 void sre(CPU *cpu, AddrMode mode);
+
+void xaa(CPU *cpu, AddrMode mode);
 
 // End instructions
 
@@ -167,6 +187,7 @@ void branch(CPU *cpu, bool condition);
 void displace(CPU *cpu, uint8_t displacement, Instruction inst);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
+uint8_t get_operand(CPU *cpu, AddrMode mode);
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
 void add_with_carry(CPU *cpu, uint8_t operand);
 

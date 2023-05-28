@@ -399,15 +399,13 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
 void adc(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     add_with_carry(cpu, operand);
 }
 
 void and(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     set_reg_a(cpu, cpu->reg_a & operand);
 }
 
@@ -446,8 +444,7 @@ void beq(CPU *cpu)
 
 void bit(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
 
     ((cpu->reg_a & operand) == 0) ? set_flag(cpu, ZERO_FLAG) : unset_flag(cpu, ZERO_FLAG);
     
@@ -532,8 +529,7 @@ void clv(CPU *cpu)
 
 void cmp(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     if (cpu->reg_a >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -548,8 +544,7 @@ void cmp(CPU *cpu, AddrMode mode)
 
 void cpx(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     if (cpu->reg_x >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -564,8 +559,7 @@ void cpx(CPU *cpu, AddrMode mode)
 
 void cpy(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     if (cpu->reg_y >= operand)
     {
         set_flag(cpu, CARRY_FLAG);
@@ -603,8 +597,7 @@ void dey(CPU *cpu)
 
 void eor(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     cpu->reg_a ^= operand;
     update_zero_and_negative_flags(cpu, cpu->reg_a); 
 }
@@ -658,15 +651,13 @@ void lda(CPU *cpu, AddrMode mode)
 
 void ldx(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     set_reg_x(cpu, operand);
 }
 
 void ldy(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     set_reg_y(cpu, operand);
 }
 
@@ -701,8 +692,7 @@ void lsr(CPU *cpu, AddrMode mode)
 
 void ora(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     set_reg_a(cpu, cpu->reg_a | operand);
 }
 
@@ -839,8 +829,7 @@ void rts(CPU *cpu)
 
 void sbc(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     // Must be the one's complement, not the two's
     add_with_carry(cpu, ~operand);
 }
@@ -916,6 +905,20 @@ void tya(CPU *cpu)
 
 // Unofficial opcodes
 
+void anc(CPU *cpu, AddrMode mode)
+{
+    uint8_t operand = get_operand(cpu, mode);
+    uint8_t result = operand & cpu->reg_a;
+    set_reg_a(cpu, result);
+    update_carry_flag(cpu, result);
+}
+
+void arr(CPU *cpu, AddrMode mode)
+{
+    uint8_t operand = get_operand(cpu, mode);
+
+}
+
 void dcp(CPU *cpu, AddrMode mode)
 {
     uint16_t addr = get_operand_addr(cpu, mode);
@@ -939,8 +942,7 @@ void isb(CPU *cpu, AddrMode mode)
 
 void lax(CPU *cpu, AddrMode mode)
 {
-    uint16_t addr = get_operand_addr(cpu, mode);
-    uint8_t operand = mem_read(cpu, addr);
+    uint8_t operand = get_operand(cpu, mode);
     set_reg_a(cpu, operand);
     set_reg_x(cpu, operand);
 }
@@ -1030,6 +1032,11 @@ void update_carry_flag(CPU *cpu, uint8_t value)
     {
         unset_flag(cpu, CARRY_FLAG);
     }
+}
+
+uint8_t get_operand(CPU *cpu, AddrMode mode)
+{
+    return mem_read(cpu, get_operand_addr(cpu, mode));
 }
 
 uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
