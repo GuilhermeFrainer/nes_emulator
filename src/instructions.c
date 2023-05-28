@@ -916,7 +916,36 @@ void anc(CPU *cpu, AddrMode mode)
 void arr(CPU *cpu, AddrMode mode)
 {
     uint8_t operand = get_operand(cpu, mode);
+    uint8_t result = cpu->reg_a & operand;
+    cpu->reg_a >>= 1;
+    int bit_5 = (result >> 5) & 1;
+    int bit_6 = (result >> 6) & 1;
+    
+    if (bit_6)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, CARRY_FLAG);
+    }
 
+    if (bit_5 ^ bit_6)
+    {
+        set_flag(cpu, OVERFLOW_FLAG);
+    }
+    else
+    {
+        unset_flag(cpu, OVERFLOW_FLAG);
+    }
+
+    update_zero_and_negative_flags(cpu, result);
+}
+
+void asr(CPU *cpu, AddrMode mode)
+{
+    and(cpu, mode);
+    lsr(cpu, mode);
 }
 
 void dcp(CPU *cpu, AddrMode mode)
@@ -940,11 +969,56 @@ void isb(CPU *cpu, AddrMode mode)
     sbc(cpu, mode);
 }
 
+void lae(CPU *cpu, AddrMode mode)
+{
+    uint8_t operand = get_operand(cpu, mode);
+    uint8_t result = operand & cpu->stack_pointer;
+    cpu->stack_pointer = result;
+    set_reg_a(cpu, result);
+    set_reg_x(cpu, result);
+}
+
 void lax(CPU *cpu, AddrMode mode)
 {
     uint8_t operand = get_operand(cpu, mode);
     set_reg_a(cpu, operand);
     set_reg_x(cpu, operand);
+}
+
+void lxa(CPU *cpu, AddrMode mode)
+{
+    and(cpu, mode);
+    tax(cpu);
+}
+
+void sha(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t result = cpu->reg_a & cpu->reg_x;
+    result &= 7;
+    mem_write(cpu, result, addr);
+}
+
+void shs(CPU *cpu, AddrMode mode)
+{
+    cpu->stack_pointer = cpu->reg_x & cpu->reg_a;
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t result = cpu->stack_pointer & ((uint8_t) (addr >> 8) + 1);
+    mem_write(cpu, result, addr);
+}
+
+void shx(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t msb = addr >> 8;
+    mem_write(cpu, cpu->reg_x & (msb + 1), addr);
+}
+
+void shy(CPU *cpu, AddrMode mode)
+{
+    uint16_t addr = get_operand_addr(cpu, mode);
+    uint8_t msb = addr >> 8;
+    mem_write(cpu, cpu->reg_y & (msb + 1), addr);
 }
 
 void rla(CPU *cpu, AddrMode mode)
@@ -966,6 +1040,19 @@ void sax(CPU *cpu, AddrMode mode)
     mem_write(cpu, result, addr);
 }
 
+void sbx(CPU *cpu, AddrMode mode)
+{
+    uint8_t operand = get_operand(cpu, mode);
+    uint8_t result = cpu->reg_x & cpu->reg_a;
+    if (operand <= result)
+    {
+        set_flag(cpu, CARRY_FLAG);
+    }
+
+    result -= operand;
+    set_reg_x(cpu, result);
+}
+
 void slo(CPU *cpu, AddrMode mode)
 {
     asl(cpu, mode);
@@ -976,6 +1063,13 @@ void sre(CPU *cpu, AddrMode mode)
 {
     lsr(cpu, mode);
     eor(cpu, mode);
+}
+
+void xaa(CPU *cpu, AddrMode mode)
+{
+    set_reg_a(cpu, cpu->reg_x);
+    uint8_t operand = get_operand(cpu, mode);
+    set_reg_a(cpu, cpu->reg_a & operand);
 }
 
 // End instructions
