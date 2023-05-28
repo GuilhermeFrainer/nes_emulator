@@ -460,6 +460,19 @@ void interpret(CPU *cpu, uint8_t opcode)
 
         // Unofficial opcodes
 
+        case 0x0B:
+        case 0x2B:
+            anc(cpu, inst.mode);
+            break;
+
+        case 0x6B:
+            arr(cpu, inst.mode);
+            break;
+
+        case 0x4B:
+            asr(cpu, inst.mode);
+            break;
+
         case 0xC7:
 		case 0xD7:
 		case 0xCF:
@@ -497,6 +510,25 @@ void interpret(CPU *cpu, uint8_t opcode)
             isb(cpu, inst.mode);
             break;
 
+        case 0x02:
+		case 0x12:
+		case 0x22:
+		case 0x32:
+		case 0x42:
+		case 0x52:
+		case 0x62:
+		case 0x72:
+		case 0x92:
+		case 0xB2:
+		case 0xD2:
+		case 0xF2:
+            // KIL
+            return;
+
+        case 0xBB:
+            lae(cpu, inst.mode);
+            break;
+
         case 0xA7:
         case 0xB7:
         case 0xAF:
@@ -515,16 +547,6 @@ void interpret(CPU *cpu, uint8_t opcode)
             // NOP
             break;
 
-        case 0x67:
-		case 0x77:
-		case 0x6F:
-		case 0x7F:
-		case 0x7B:
-		case 0x63:
-		case 0x73:
-            rra(cpu, inst.mode);
-            break;
-
         case 0x27:
 		case 0x37:
 		case 0x2F:
@@ -535,6 +557,16 @@ void interpret(CPU *cpu, uint8_t opcode)
             rla(cpu, inst.mode);
             break;
 
+        case 0x67:
+		case 0x77:
+		case 0x6F:
+		case 0x7F:
+		case 0x7B:
+		case 0x63:
+		case 0x73:
+            rra(cpu, inst.mode);
+            break;
+
         case 0x87:
         case 0x97:
         case 0x8F:
@@ -542,8 +574,29 @@ void interpret(CPU *cpu, uint8_t opcode)
             sax(cpu, inst.mode);
             break;
 
+        case 0xCB:
+            sbx(cpu, inst.mode);
+            break;
+
         case 0xEB:
             sbc(cpu, inst.mode);
+            break;
+
+        case 0x9F:
+        case 0x93:
+            sha(cpu, inst.mode);
+            break;
+
+        case 0x9B:
+            shs(cpu, inst.mode);
+            break;
+
+        case 0x9E:
+            shx(cpu, inst.mode);
+            break;
+
+        case 0x9C:
+            shy(cpu, inst.mode);
             break;
 
         case 0x07:
@@ -573,6 +626,10 @@ void interpret(CPU *cpu, uint8_t opcode)
 		case 0xDC:
 		case 0xFC:
             // TOP (Triple NOP)
+            break;
+
+        case 0x8B:
+            xaa(cpu, inst.mode);
             break;
         
         default:

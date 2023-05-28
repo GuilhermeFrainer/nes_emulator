@@ -225,7 +225,7 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
         // Unofficial opcodes
 
-        // AAC: AND with accumulator. Sets carry is result is negative.
+        // ANC: AND with accumulator. Sets carry is result is negative.
         case 0x0B: inst = (Instruction) {0x0B, "*ANC\0", 2, 2, Immediate}; return inst;
         case 0x2B: inst = (Instruction) {0x2B, "*ANC\0", 2, 2, Immediate}; return inst;
 
@@ -336,6 +336,9 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         case 0x8F: inst = (Instruction) {0x8F, "*SAX\0", 3, 4, Absolute}; return inst;
         case 0x83: inst = (Instruction) {0x83, "*SAX\0", 2, 6, IndirectX}; return inst;
 
+        // Identical to official opcode 0xEB
+        case 0xEB: inst = (Instruction) {0xEB, "*SBC\0", 2, 2, Immediate}; return inst;
+
         // SBX: AND X with accumulator and store result in X, then subtract byte from X
         // without borrow
         case 0xCB: inst = (Instruction) {0xCB, "*SBX\0", 2, 2, Immediate}; return inst;
@@ -357,9 +360,6 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         // SHY: AND X with the high byte of the target address + 1
         // Store result in memory
         case 0x9C: inst = (Instruction) {0x9C, "*SHY\0", 3, 5, AbsoluteX}; return inst;
-
-        // Identical to official opcode 0xEB
-        case 0xEB: inst = (Instruction) {0xEB, "*SBC\0", 2, 2, Immediate}; return inst;
 
         // SLO: Shift left and OR with accumulator
         case 0x07: inst = (Instruction) {0x07, "*SLO\0", 2, 5, ZeroPage}; return inst;
