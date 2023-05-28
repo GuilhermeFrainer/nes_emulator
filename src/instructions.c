@@ -225,6 +225,21 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
         // Unofficial opcodes
 
+        // AAC: AND with accumulator. Sets carry is result is negative.
+        case 0x0B: inst = (Instruction) {0x0B, "*ANC\0", 2, 2, Immediate}; return inst;
+        case 0x2B: inst = (Instruction) {0x2B, "*ANC\0", 2, 2, Immediate}; return inst;
+
+        // ARR: AND with accumulator then rotate accumulator one bit to the right
+        // Check bits 5 and 6:
+        // If both bits are 1: set C, clear V.
+        // If both bits are 0: clear C and V.
+        // If only bit 5 is 1: set V, clear C.
+        // If only bit 6 is 1: set C and V.
+        case 0x6B: inst = (Instruction) {0x6B, "*ARR\0", 2, 2, Immediate}; return inst;
+
+        // ASR: AND with accumulator then shift one bit to the right
+        case 0x4B: inst = (Instruction) {0x4B, "*ASR\0", 2, 2, Immediate}; return inst;
+
         // DCP: Decrement memory and compare with accumulator
         case 0xC7: inst = (Instruction) {0xC7, "*DCP\0", 2, 5, ZeroPage}; return inst;
 		case 0xD7: inst = (Instruction) {0xD7, "*DCP\0", 2, 6, ZeroPageX}; return inst;
@@ -259,6 +274,24 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 		case 0xE3: inst = (Instruction) {0xE3, "*ISB\0", 2, 8, IndirectX}; return inst;
 		case 0xF3: inst = (Instruction) {0xF3, "*ISB\0", 2, 8, IndirectY}; return inst;
 
+        // KIL: Stop program counter. Affects no flags.
+        case 0x02: inst = (Instruction) {0x02, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x12: inst = (Instruction) {0x12, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x22: inst = (Instruction) {0x22, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x32: inst = (Instruction) {0x32, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x42: inst = (Instruction) {0x42, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x52: inst = (Instruction) {0x52, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x62: inst = (Instruction) {0x62, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x72: inst = (Instruction) {0x72, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0x92: inst = (Instruction) {0x92, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0xB2: inst = (Instruction) {0xB2, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0xD2: inst = (Instruction) {0xD2, "*KIL\0", 1, 0, Implied}; return inst;
+		case 0xF2: inst = (Instruction) {0xF2, "*KIL\0", 1, 0, Implied}; return inst;
+
+        // LAE: AND with stack pointer and transfer result to X, accumulator and stack
+        // pointer.
+        case 0xBB: inst = (Instruction) {0xBB, "*LAE\0", 3, 4, AbsoluteY}; return inst;
+
         // LAX: Load accumulator and X register
         case 0xA7: inst = (Instruction) {0xA7, "*LAX\0", 2, 3, ZeroPage}; return inst;
         case 0xB7: inst = (Instruction) {0xB7, "*LAX\0", 2, 4, ZeroPageY}; return inst;
@@ -266,6 +299,9 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         case 0xBF: inst = (Instruction) {0xBF, "*LAX\0", 3, 4, AbsoluteY}; return inst;
         case 0xA3: inst = (Instruction) {0xA3, "*LAX\0", 2, 6, IndirectX}; return inst;
         case 0xB3: inst = (Instruction) {0xB3, "*LAX\0", 2, 5, IndirectY}; return inst;
+
+        // LXA: AND with accumulator then transfer accumulator to register X
+        case 0xAB: inst = (Instruction) {0xAB, "*LXA\0", 2, 2, Immediate}; return inst;
 
         // NOP
         case 0x1A: inst = (Instruction) {0x1A, "*NOP\0", 1, 2, Implied}; return inst;
@@ -300,6 +336,28 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
         case 0x8F: inst = (Instruction) {0x8F, "*SAX\0", 3, 4, Absolute}; return inst;
         case 0x83: inst = (Instruction) {0x83, "*SAX\0", 2, 6, IndirectX}; return inst;
 
+        // SBX: AND X with accumulator and store result in X, then subtract byte from X
+        // without borrow
+        case 0xCB: inst = (Instruction) {0xCB, "*SBX\0", 2, 2, Immediate}; return inst;
+
+        // SHA: AND X and accumulator then AND result with 7 and store in memory
+        // Affects no status flags
+        case 0x9F: inst = (Instruction) {0x9F, "*SHA\0", 3, 5, AbsoluteY}; return inst;
+        case 0x93: inst = (Instruction) {0x93, "*SHA\0", 2, 6, IndirectY}; return inst;
+
+        // SHS: AND X with accumulator and store result in stack pointer
+        // Then AND stack pointer with the high byte of the target address + 1
+        // Store result in memory
+        case 0x9B: inst = (Instruction) {0x9B, "*SHS\0", 3, 5, AbsoluteY}; return inst;
+
+        // SHX: AND X with the high byte of the target address + 1
+        // Store result in memory
+        case 0x9E: inst = (Instruction) {0x9E, "*SHX\0", 3, 5, AbsoluteY}; return inst;
+
+        // SHY: AND X with the high byte of the target address + 1
+        // Store result in memory
+        case 0x9C: inst = (Instruction) {0x9C, "*SHY\0", 3, 5, AbsoluteX}; return inst;
+
         // Identical to official opcode 0xEB
         case 0xEB: inst = (Instruction) {0xEB, "*SBC\0", 2, 2, Immediate}; return inst;
 
@@ -329,6 +387,9 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 		case 0x7C: inst = (Instruction) {0x7C, "*NOP\0", 3, 4, AbsoluteX}; return inst;
 		case 0xDC: inst = (Instruction) {0xDC, "*NOP\0", 3, 4, AbsoluteX}; return inst;
 		case 0xFC: inst = (Instruction) {0xFC, "*NOP\0", 3, 4, AbsoluteX}; return inst;
+
+        // XAA: Exact operation unknown
+        case 0x8B: inst = (Instruction) {0x8B, "*XAA\0", 2, 2, Immediate}; return inst; 
 
         default: inst = (Instruction) {0x00, "BRK\0", 1, 7, Implied}; return inst;
     }
