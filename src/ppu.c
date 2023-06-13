@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 // Instantiates a new PPU
-PPU *new_ppu(uint8_t *chr_rom, Mirroring mirroring)
+PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring)
 {
     PPU *ppu = malloc(sizeof(PPU));
     // Initialize registers
@@ -17,7 +17,7 @@ PPU *new_ppu(uint8_t *chr_rom, Mirroring mirroring)
     ppu->oam_addr = 0;
     ppu->oam_data_reg = 0;
     ppu->scroll = 0;
-    ppu->address = new_addrregister();
+    ppu->address = addrregister_new();
     ppu->data = 0;
     ppu->oam_dma = 0;
 
@@ -35,19 +35,19 @@ PPU *new_ppu(uint8_t *chr_rom, Mirroring mirroring)
 // Controller register functions
 
 // Checks if a certain flag in the controller register is set
-bool controller_bit_is_set(PPU *ppu, uint8_t flag)
+bool ppu_controller_bit_is_set(PPU *ppu, uint8_t flag)
 {
     return ppu->controller & flag ? true : false;
 }
 
 // Sets the specified flag in the controller register
-void controller_bit_set(PPU *ppu, uint8_t flag)
+void ppu_controller_bit_set(PPU *ppu, uint8_t flag)
 {
     ppu->controller |= flag;
 }
 
 // Unsets the specified flag in the controller register
-void controller_bit_unset(PPU *ppu, uint8_t flag)
+void ppu_controller_bit_unset(PPU *ppu, uint8_t flag)
 {
     ppu->controller &= ~flag;
 }
@@ -55,9 +55,9 @@ void controller_bit_unset(PPU *ppu, uint8_t flag)
 // VRAM functions
 
 // Increments the address register 
-void vram_addr_increment(PPU *ppu)
+void ppu_vram_addr_increment(PPU *ppu)
 {
-    if (controller_bit_is_set(ppu, VRAM_ADDR_INCREMENT))
+    if (ppu_controller_bit_is_set(ppu, VRAM_ADDR_INCREMENT))
     {
         return addrregister_increment(ppu->address, 1);
     }
@@ -68,7 +68,7 @@ void vram_addr_increment(PPU *ppu)
 }
 
 // Returns address to be accessed in the VRAM based on type of mirroring
-uint16_t mirror_vram_addr(PPU *ppu, uint16_t addr)
+uint16_t ppu_mirror_vram_addr(PPU *ppu, uint16_t addr)
 {
     uint16_t mirrored_vram = addr & 0x2EFF;
     // Converts to index usable in the VRAM array
@@ -99,20 +99,20 @@ uint16_t mirror_vram_addr(PPU *ppu, uint16_t addr)
 uint8_t ppu_mem_read(PPU *ppu)
 {
     uint16_t addr = addrregister_get(ppu->address);
-    vram_addr_increment(ppu);
+    ppu_vram_addr_increment(ppu);
     
-    // Read from char ROM
+    // Read from CHR ROM
     if (addr <= 0x1FFF)
     {
         uint8_t result = ppu->internal_data_buffer;
         ppu->internal_data_buffer = ppu->chr_rom[addr];
         return result;
     }
-    // Read from RAM
+    // Read from VRAM
     else if (addr >= 0x2000 && addr <= 0x2FFF) 
     {
         uint8_t result = ppu->internal_data_buffer;
-        ppu->internal_data_buffer = ppu->vram[mirror_vram_addr(ppu, addr)];
+        ppu->internal_data_buffer = ppu->vram[ppu_mirror_vram_addr(ppu, addr)];
         return result;
     }
     // Access to forbidden memory space
@@ -121,6 +121,7 @@ uint8_t ppu_mem_read(PPU *ppu)
         fprintf(stderr, "Access to forbidden memory space at %04X", addr);
         return 0;
     }
+    // Read from palettes
     else if (addr >= 0x3F00 && addr <= 0x3FFF)
     {
         return ppu->palette_table[addr - 0x3F00];
@@ -135,21 +136,57 @@ uint8_t ppu_mem_read(PPU *ppu)
 // Write to register functions
 
 // Writes value to PPU controller register
-void write_to_controller(PPU *ppu, uint8_t value)
+void ppu_write_to_controller(PPU *ppu, uint8_t value)
 {
     ppu->controller = value;
 }
 
+// Writes value to PPU mask register
+void ppu_write_to_mask(PPU *ppu, uint8_t value)
+{
+    ppu->mask = value;
+}
+
+// Writes value to PPU OAM address register
+void ppu_write_to_oam_addr(PPU *ppu, uint8_t value)
+{
+    ppu->oam_addr = value;
+}
+
+// Writes value to PPU OAM data register
+void ppu_write_to_oam_data(PPU *ppu, uint8_t value)
+{
+    ppu->oam_data_reg = value;
+}
+
+// Writes value to PPU scroll register
+void ppu_write_to_scroll(PPU *ppu, uint8_t value)
+{
+    ppu->scroll = value;
+}
+
 // Writes value to PPU address register
-void write_to_ppu_addr(PPU *ppu, uint8_t value)
+void ppu_write_to_ppu_addr(PPU *ppu, uint8_t value)
 {
     addrregister_update(ppu->address, value);
+}
+
+// Writes value to PPU data register
+void ppu_write_to_ppu_data(PPU *ppu, uint8_t value)
+{
+    ppu->data = value;
+}
+
+// Writes value to PPU OAM DMA register
+void ppu_write_to_oam_dma(PPU *ppu, uint8_t value)
+{
+    ppu->oam_dma = value;
 }
 
 // AddrRegister functions
 
 // Instantiates new AddrRegister
-AddrRegister new_addrregister(void)
+AddrRegister addrregister_new(void)
 {
     AddrRegister addr_reg;
     addr_reg.value[0] = 0;

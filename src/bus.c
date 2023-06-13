@@ -13,7 +13,7 @@ Bus *new_bus(ROM *rom)
     Bus *bus = malloc(sizeof(Bus));
     bus->rom = rom;
     memset(bus->ram, 0, sizeof(bus->ram));
-    bus->ppu = new_ppu(rom->chr_rom, rom->mirroring); 
+    bus->ppu = ppu_new(rom->chr_rom, rom->mirroring); 
     return bus;
 }
 
@@ -37,7 +37,7 @@ uint8_t bus_mem_read(Bus *bus, uint16_t addr)
     {
         return ppu_mem_read(bus->ppu);
     }
-    // Access to mirrored area
+    // Access to area mirroring PPU registers
     else if (addr >= PPU_MIRROR_START && addr <= PPU_MIRROR_END)
     {
         uint16_t mirrored_down_addr = addr & 0b0010000000000111;
@@ -56,7 +56,7 @@ uint8_t bus_mem_read(Bus *bus, uint16_t addr)
     }
     else
     {
-        fprintf(stderr, "Ignoring memory access at address %04X\n", addr);
+        fprintf(stderr, "Ignoring memory access at address %04X.\n", addr);
         return 0;
     }
 }
@@ -72,14 +72,62 @@ void bus_mem_write(Bus *bus, uint8_t value, uint16_t addr)
         bus->ram[addr] = value;
         return;
     }
+    
+    // PPU
+    else if (addr >= 0x2000 && addr <= 0x2007)
+    {
+        switch (addr)
+        {
+            case 0x2000:
+                ppu_write_to_controller(bus->ppu, value);
+                return;
+            case 0x2001:
+                ppu_write_to_mask(bus->ppu, value);
+                return;
+            case 0x2002:
+                fprintf(stderr, "Attempted to write to read-only PPU status register.\n");
+                return;
+            case 0x2003:
+                ppu_write_to_oam_addr(bus->ppu, value);
+                return;
+            case 0x2004:
+                ppu_write_to_oam_data(bus->ppu, value);
+                return;
+            case 0x2005:
+                ppu_write_to_scroll(bus->ppu, value);
+                return;
+            case 0x2006:
+                ppu_write_to_ppu_addr(bus->ppu, value);
+                return;
+            case 0x2007:
+                ppu_write_to_ppu_data(bus->ppu, value);
+                return;
+            default:
+                fprintf(stderr, "Tried to access unknown PPU register: %04X.\n", addr);
+                return;
+        }
+    }
+    // PPU mirror space
+    else if (addr >= PPU_MIRROR_START && addr <= PPU_MIRROR_END)
+    {
+        uint16_t mirrored_down_addr = addr & 0x2007;
+        bus_mem_write(bus, value, mirrored_down_addr);
+        return;
+    }
+    else if (addr == 0x4014)
+    {
+        ppu_write_to_oam_dma(bus->ppu, value);
+        return;
+    }
     // PRG ROM
     else if (addr >= PRG_ROM_START && addr <= PRG_ROM_MIRROR_END)
     {
-        fprintf(stderr, "Error: attempted to write to PRG ROM space.\n");
+        fprintf(stderr, "Error: attempted to write to PRG ROM space at %04X.\n", addr);
         return;
     }
-
-    // TODO: PPU
-
-    return;
+    else 
+    {
+        fprintf(stderr, "Attempted to write to non-handled address at %04X.\n", addr);
+        return;
+    }
 }

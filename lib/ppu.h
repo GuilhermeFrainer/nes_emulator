@@ -33,7 +33,7 @@ typedef struct PPU {
     Mirroring mirroring;
 } PPU;
 
-PPU *new_ppu(uint8_t *chr_rom, Mirroring mirroring);
+PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring);
 
 /*
     CONTROLLER REGISTER BITS
@@ -66,24 +66,30 @@ PPU *new_ppu(uint8_t *chr_rom, Mirroring mirroring);
 #define GENERATE_NMI            0b10000000
 
 // Controller register functions
-bool controller_bit_is_set(PPU *ppu, uint8_t flag);
-void controller_bit_unset(PPU *ppu, uint8_t flag);
-void controller_register_set(PPU *ppu, uint8_t value);
+bool ppu_controller_bit_is_set(PPU *ppu, uint8_t flag);
+void ppu_controller_bit_unset(PPU *ppu, uint8_t flag);
+void ppu_controller_register_set(PPU *ppu, uint8_t value);
 
 // Memory functions
 uint8_t ppu_mem_read(PPU *ppu);
 void ppu_mem_write(PPU *ppu, uint8_t value);
 
 // VRAM functions
-void vram_addr_increment(PPU *ppu);
-uint16_t mirror_vram_addr(PPU *ppu, uint16_t addr);
+void ppu_vram_addr_increment(PPU *ppu);
+uint16_t ppu_mirror_vram_addr(PPU *ppu, uint16_t addr);
 
 // Write to register functions
-void write_to_ppu_addr(PPU *ppu, uint8_t value);
-void write_to_controller(PPU *ppu, uint8_t value);
+void ppu_write_to_controller(PPU *ppu, uint8_t value);
+void ppu_write_to_mask(PPU *ppu, uint8_t value);
+void ppu_write_to_oam_addr(PPU *ppu, uint8_t value);
+void ppu_write_to_oam_data(PPU *ppu, uint8_t value);
+void ppu_write_to_scroll(PPU *ppu, uint8_t value);
+void ppu_write_to_ppu_addr(PPU *ppu, uint8_t value);
+void ppu_write_to_ppu_data(PPU *ppu, uint8_t value);
+void ppu_write_to_oam_dma(PPU *ppu, uint8_t value);
 
 // AddrRegister functions
-AddrRegister new_addrregister(void);
+AddrRegister addrregister_new(void);
 void addrregister_set(AddrRegister addr_reg, uint16_t value);
 void addrregister_update(AddrRegister addr_reg, uint8_t value);
 void addrregister_increment(AddrRegister addr_reg, uint8_t value);
