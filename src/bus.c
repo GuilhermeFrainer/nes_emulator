@@ -14,7 +14,14 @@ Bus *new_bus(ROM *rom)
     bus->rom = rom;
     memset(bus->ram, 0, sizeof(bus->ram));
     bus->ppu = ppu_new(rom->chr_rom, rom->mirroring); 
+    bus->cycles = 0;
     return bus;
+}
+
+void bus_tick(Bus *bus, int cycles)
+{
+    bus->cycles += cycles;
+    ppu_tick(bus->ppu, cycles * 3); // Multiplies cycles by 3 because each CPU cycle is 3 PPU cycles
 }
 
 uint8_t bus_mem_read(Bus *bus, uint16_t addr)

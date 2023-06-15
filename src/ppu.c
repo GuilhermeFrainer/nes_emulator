@@ -23,13 +23,40 @@ PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring)
 
     ppu->chr_rom = chr_rom;
     ppu->mirroring = mirroring;
-
+    ppu->cycles = 0;
+    ppu->scanline = 0;
 
     memset(ppu->vram, 0, sizeof(ppu->vram)/sizeof(uint8_t));
     memset(ppu->vram, 0, sizeof(ppu->oam_data)/sizeof(uint8_t));
     memset(ppu->vram, 0, sizeof(ppu->palette_table)/sizeof(uint8_t));
 
     return ppu;
+}
+
+bool ppu_tick(PPU *ppu, int cycles)
+{
+    ppu->cycles += cycles;
+    if (ppu->cycles >= SCANLINE_CYCLES)
+    {
+        ppu->cycles -= SCANLINE_CYCLES;
+        ppu->scanline++;
+
+        if (ppu->scanline == MAX_VISIBLE_SCANLINES + 1)
+        {
+            if (ppu_controller_bit_is_set(ppu, GENERATE_NMI))
+            {
+                ppu_status_bit_set(ppu, VBLANK_STARTED);  
+                // TODO: Trigger NMI interrupt
+            }
+        }
+        else if (ppu->scanline >= MAX_SCANLINES)
+        {
+            ppu->scanline = 0;
+            ppu_status_bit_unset(ppu, VBLANK_STARTED);
+            return true;
+        }
+    }
+    return false;
 }
 
 // Controller register functions
@@ -51,6 +78,23 @@ void ppu_controller_bit_unset(PPU *ppu, uint8_t flag)
 {
     ppu->controller &= ~flag;
 }
+
+// Status regiter functions
+void ppu_status_bit_set(PPU *ppu, uint8_t flag)
+{
+    ppu->status |= flag;
+}
+
+void ppu_status_bit_unset(PPU *ppu, uint8_t flag)
+{
+    ppu->status &= ~flag;
+}
+
+bool ppu_statuts_bit_is_set(PPU *ppu, uint8_t flag)
+{
+    return ppu->status & flag ? true : false;
+}
+
 
 // VRAM functions
 

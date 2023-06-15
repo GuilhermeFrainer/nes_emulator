@@ -27,6 +27,7 @@ void destroy_cpu(CPU *cpu)
     free(cpu->bus->rom->prg_rom);
     free(cpu->bus->rom->chr_rom);
     free(cpu->bus->rom);
+    free(cpu->bus->ppu);
     free(cpu->bus);
     free(cpu);
 }

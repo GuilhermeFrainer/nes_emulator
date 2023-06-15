@@ -1,3 +1,6 @@
+#ifndef PPU_H
+#define PPU_H
+
 #include "cartridge.h"
 
 #include <stdint.h>
@@ -31,9 +34,16 @@ typedef struct PPU {
     uint8_t oam_data[256];
 
     Mirroring mirroring;
+    int cycles;
+    int scanline;
 } PPU;
 
+#define SCANLINE_CYCLES 341
+#define MAX_VISIBLE_SCANLINES 240
+#define MAX_SCANLINES 262
+
 PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring);
+bool ppu_tick(PPU *ppu, int cycles);
 
 /*
     CONTROLLER REGISTER BITS
@@ -67,8 +77,24 @@ PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring);
 
 // Controller register functions
 bool ppu_controller_bit_is_set(PPU *ppu, uint8_t flag);
+void ppu_controller_bit_set(PPU *ppu, uint8_t flag);
 void ppu_controller_bit_unset(PPU *ppu, uint8_t flag);
 void ppu_controller_register_set(PPU *ppu, uint8_t value);
+
+// Status register defines
+#define NOTUSED1        0b00000001
+#define NOTUSED2        0b00000010
+#define NOTUSED3        0b00000100
+#define NOTUSED4        0b00001000
+#define NOTUSED5        0b00010000
+#define SPRITE_OVERFLOW 0b00100000
+#define SPRITE_ZERO_HIT 0b01000000
+#define VBLANK_STARTED  0b10000000
+
+// Status register functions
+void ppu_status_bit_set(PPU *ppu, uint8_t flag);
+void ppu_status_bit_unset(PPU *ppu, uint8_t flag);
+bool ppu_statuts_bit_is_set(PPU *ppu, uint8_t flag);
 
 // Memory functions
 uint8_t ppu_mem_read(PPU *ppu);
@@ -95,3 +121,5 @@ void addrregister_update(AddrRegister addr_reg, uint8_t value);
 void addrregister_increment(AddrRegister addr_reg, uint8_t value);
 void addrregister_reset_pointer(AddrRegister addr_reg);
 uint16_t addrregister_get(AddrRegister addr_reg);
+
+#endif
