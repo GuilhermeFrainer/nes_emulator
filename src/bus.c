@@ -2,7 +2,6 @@
 #include "../lib/cartridge.h"
 #include "../lib/ppu.h"
 
-#include <errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>

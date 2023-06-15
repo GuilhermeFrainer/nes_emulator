@@ -1,5 +1,9 @@
 #include "../lib/instructions.h"
 #include "../lib/cpu.h"
+#include "../lib/bus.h"
+
+#include <stdint.h>
+#include <stdio.h>
 
 Instruction inst_list[0x100];
 
@@ -629,7 +633,6 @@ void iny(CPU *cpu)
 
 void jmp(CPU *cpu, AddrMode mode)
 {
-    // Not implemented: page end bug
     cpu->program_counter = get_operand_addr(cpu, mode);
 }
 
@@ -1078,20 +1081,20 @@ void xaa(CPU *cpu, AddrMode mode)
 
 void branch(CPU *cpu, bool condition)
 {
-    cpu->program_counter += (condition) ? (int8_t) mem_read(cpu, cpu->program_counter) : 0;
+    uint16_t original_pc = cpu->program_counter - 1;
+    if (condition)
+    {
+        cpu->program_counter += (int8_t) mem_read(cpu, cpu->program_counter);
+        cpu->bus->cycles++; // Adds a cycle if the comparison is successful
+        
+        // Adds a cycle if page-crossing
+        // Assumes that the reference point is the program counter at the opcode of the branch instruction
+        if (original_pc >> 8 != (cpu->program_counter + 1) >> 8)
+        {
+            cpu->bus->cycles++;
+        }
+    }
     cpu->program_counter++;
-}
-
-void displace(CPU *cpu, uint8_t displacement, Instruction inst)
-{
-    if (displacement != 0)
-    {
-        cpu->program_counter += displacement;
-    }
-    else
-    {
-        cpu->program_counter += inst.bytes - 1;
-    }
 }
 
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
@@ -1137,6 +1140,9 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
 {
     switch (mode)
     {
+        uint16_t base_u16;
+        uint16_t addr;
+
         case Immediate: return cpu->program_counter;
 
         case ZeroPage: return mem_read(cpu, cpu->program_counter);
@@ -1144,12 +1150,20 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
         case ZeroPageY: return (uint8_t) (mem_read(cpu, cpu->program_counter) + cpu->reg_y);
 
         case Absolute: return mem_read_u16(cpu, cpu->program_counter);
-        case AbsoluteX: return mem_read_u16(cpu, cpu->program_counter) + cpu->reg_x;
-        case AbsoluteY: return mem_read_u16(cpu, cpu->program_counter) +  cpu->reg_y;
+        case AbsoluteX: 
+            base_u16 = mem_read_u16(cpu, cpu->program_counter);
+            addr = base_u16 + cpu->reg_x; 
+            deal_with_page_crossing(cpu, base_u16, addr);
+            return addr;
+        case AbsoluteY:
+            base_u16 = mem_read_u16(cpu, cpu->program_counter);
+            addr = base_u16 + cpu->reg_y;
+            deal_with_page_crossing(cpu, base_u16, addr);
+            return addr;
 
         // Indirect addressing modes wrap around if the address falls on a page boundary
         case Indirect:
-            uint16_t base_u16 = mem_read_u16(cpu, cpu->program_counter);
+            base_u16 = mem_read_u16(cpu, cpu->program_counter);
             if ((base_u16 & 0xFF) == 0xFF)
             {
                 uint8_t low = mem_read(cpu, base_u16);
@@ -1172,9 +1186,12 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode)
             uint8_t low_y = mem_read(cpu, base_y);
             base_y++;
             uint8_t high_y = mem_read(cpu, base_y);
-            return ((uint16_t) high_y << 8 | low_y) + cpu->reg_y;
-            // return mem_read_u16(cpu, base_y) + cpu->reg_y;
+            base_u16 = (uint16_t) high_y << 8 | low_y;
+            addr = base_u16 + cpu->program_counter;
+            deal_with_page_crossing(cpu, base_u16, addr);
+            return addr;
         default:
+            fprintf(stderr, "Unknown addressing mode used.\n");
             return 0;
     }
 }
@@ -1207,4 +1224,13 @@ void add_with_carry(CPU *cpu, uint8_t operand)
         unset_flag(cpu, OVERFLOW_FLAG);
     }
     set_reg_a(cpu, result);
+}
+
+// Deals with instructions which take one more cycle if page-crossed
+void deal_with_page_crossing(CPU *cpu, uint16_t base_addr, uint16_t end_addr)
+{
+    if (base_addr >> 8 != end_addr >> 8)
+    {
+        cpu->bus->cycles++;
+    }
 }
