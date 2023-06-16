@@ -186,8 +186,8 @@ void xaa(CPU *cpu, AddrMode mode);
 void branch(CPU *cpu, bool condition);
 void update_zero_and_negative_flags(CPU *cpu, uint8_t result);
 void update_carry_flag(CPU *cpu, uint8_t value);
-uint8_t get_operand(CPU *cpu, AddrMode mode);
-uint16_t get_operand_addr(CPU *cpu, AddrMode mode);
+uint8_t get_operand(CPU *cpu, AddrMode mode, bool page_crossing);
+uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing);
 void add_with_carry(CPU *cpu, uint8_t operand);
 void deal_with_page_crossing(CPU *cpu, uint16_t base_addr, uint16_t end_addr);
 
