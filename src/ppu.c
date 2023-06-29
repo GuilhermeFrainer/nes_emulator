@@ -1,4 +1,5 @@
 #include "../lib/ppu.h"
+#include "../lib/bus.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,6 +27,8 @@ PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring)
     ppu->cycles = 0;
     ppu->scanline = 0;
 
+    ppu->interrupt = None;
+
     memset(ppu->vram, 0, sizeof(ppu->vram)/sizeof(uint8_t));
     memset(ppu->vram, 0, sizeof(ppu->oam_data)/sizeof(uint8_t));
     memset(ppu->vram, 0, sizeof(ppu->palette_table)/sizeof(uint8_t));
@@ -46,7 +49,7 @@ bool ppu_tick(PPU *ppu, int cycles)
             if (ppu_controller_bit_is_set(ppu, GENERATE_NMI))
             {
                 ppu_status_bit_set(ppu, VBLANK_STARTED);  
-                // TODO: Trigger NMI interrupt
+                ppu->interrupt = NMI;
             }
         }
         else if (ppu->scanline >= MAX_SCANLINES)

@@ -813,6 +813,7 @@ void ror(CPU *cpu, AddrMode mode)
 
 // Return instructions
 
+// Return from interrupt
 void rti(CPU *cpu)
 {
     uint8_t flags = stack_pull(cpu);

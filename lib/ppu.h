@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef enum Interrupt Interrupt;
+
 typedef struct AddrRegister
 {
     uint8_t value[2];
@@ -36,6 +38,8 @@ typedef struct PPU {
     Mirroring mirroring;
     int cycles;
     int scanline;
+
+    Interrupt interrupt;
 } PPU;
 
 #define SCANLINE_CYCLES 341

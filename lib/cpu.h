@@ -8,6 +8,7 @@
 typedef struct Instruction Instruction;
 typedef struct Bus Bus;
 typedef struct ROM ROM;
+typedef enum Interrupt Interrupt;
 
 typedef struct CPU
 {
@@ -66,6 +67,7 @@ void reset(CPU *cpu);
 void load(CPU *cpu);
 void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture);
 void interpret(CPU *cpu, uint8_t opcode);
+void interrupt(CPU *cpu, Interrupt interrupt_type);
 
 // Register functions
 void set_reg_a(CPU *cpu, uint8_t value);

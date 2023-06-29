@@ -86,6 +86,22 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
     
     while (1)
     {
+        Interrupt interrupt_type = bus_poll_for_interrupt(cpu->bus);
+        switch (interrupt_type)
+        {
+            case NMI:
+                interrupt(cpu, interrupt_type);
+                break;
+            case IRQ:
+                if (!is_set(cpu, INTERRUPT_FLAG))
+                {
+                    interrupt(cpu, interrupt_type);
+                }
+                break;
+            case None:
+                break;
+        }
+
         uint8_t opcode = mem_read(cpu, cpu->program_counter);
         mem_write(cpu, (rand() % 256) + 1, RAND_NUM_ADDR);
         interpret(cpu, opcode);
@@ -641,6 +657,27 @@ void interpret(CPU *cpu, uint8_t opcode)
     {
         cpu->program_counter = original_pc_state + inst.bytes;
     }
+}
+
+// Execute interrupt
+void interrupt(CPU *cpu, Interrupt interrupt_type)
+{
+    stack_push_u16(cpu, cpu->program_counter);
+    stack_push(cpu, cpu->status);
+    set_flag(cpu, INTERRUPT_FLAG);
+
+    bus_tick(cpu->bus, 7); // Interrupt takes 7 cycles
+    // Places interrupt vector's address on the program counter
+    switch (interrupt_type)
+    {
+        case IRQ:
+            cpu->program_counter = mem_read_u16(cpu, 0xFFFE);
+            break;
+        case NMI:
+            cpu->program_counter = mem_read_u16(cpu, 0xFFFA);
+            break;
+    }
+    cpu->bus->ppu->interrupt = None;
 }
 
 // Register functions

@@ -137,3 +137,8 @@ void bus_mem_write(Bus *bus, uint8_t value, uint16_t addr)
         return;
     }
 }
+
+Interrupt bus_poll_for_interrupt(Bus *bus)
+{
+    return bus->ppu->interrupt;
+}
