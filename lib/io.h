@@ -26,10 +26,13 @@ typedef struct Color {
 } Color;
 
 extern uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
+extern Color SYSTEM_PALETTE[sizeof(Color) * 64];
 
 bool handle_input(CPU *cpu, SDL_Event *event);
 Color get_color(uint8_t byte);
 Color new_color(uint8_t red, uint8_t green, uint8_t blue);
 bool read_screen_state(CPU *cpu, uint8_t buffer[GAME_HEIGHT * GAME_WIDTH * 3]);
+
+void palette_initialize(void);
 
 #endif

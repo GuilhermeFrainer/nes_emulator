@@ -142,3 +142,8 @@ Interrupt bus_poll_for_interrupt(Bus *bus)
 {
     return bus->ppu->interrupt;
 }
+
+void bus_clear_interrupt(Bus *bus)
+{
+    bus->ppu->interrupt = None;
+}

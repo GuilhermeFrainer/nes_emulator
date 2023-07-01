@@ -2,11 +2,10 @@
 #define PPU_H
 
 #include "cartridge.h"
+#include "bus.h" // Must be included for 'Interrupt' enum
 
 #include <stdint.h>
 #include <stdbool.h>
-
-typedef enum Interrupt Interrupt;
 
 typedef struct AddrRegister
 {

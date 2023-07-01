@@ -15,13 +15,6 @@
 typedef struct ROM ROM;
 typedef struct PPU PPU;
 
-typedef enum Interrupt
-{
-    IRQ,
-    NMI,
-    None
-} Interrupt;
-
 typedef struct Bus
 {
     uint8_t ram[0x0800];
@@ -30,10 +23,19 @@ typedef struct Bus
     int cycles;
 } Bus;
 
+typedef enum Interrupt
+{
+    IRQ,
+    NMI,
+    None
+} Interrupt;
+
+
 Bus *new_bus(ROM *rom);
 void bus_tick(Bus *bus, int cycles);
 uint8_t bus_mem_read(Bus *bus, uint16_t addr);
 void bus_mem_write(Bus *bus, uint8_t value, uint16_t addr);
 Interrupt bus_poll_for_interrupt(Bus *bus);
+void bus_clear_interrupt(Bus *bus);
 
 #endif

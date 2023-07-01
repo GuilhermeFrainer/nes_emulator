@@ -676,8 +676,10 @@ void interrupt(CPU *cpu, Interrupt interrupt_type)
         case NMI:
             cpu->program_counter = mem_read_u16(cpu, 0xFFFA);
             break;
+        case None:
+            break;
     }
-    cpu->bus->ppu->interrupt = None;
+    bus_clear_interrupt(cpu->bus);
 }
 
 // Register functions
