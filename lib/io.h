@@ -5,11 +5,10 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
-#define GAME_WIDTH 32
-#define GAME_HEIGHT 32
-#define SCALE 10
-#define WIN_WIDTH GAME_WIDTH * SCALE
-#define WIN_HEIGHT GAME_HEIGHT * SCALE
+#define FRAME_WIDTH 256
+#define FRAME_HEIGHT 240
+
+#define SCALE 5
 
 #define SCREEN_MEM 0x0200
 #define SCREEN_SIZE 0x0400
@@ -25,13 +24,18 @@ typedef struct Color {
     uint8_t b;
 } Color;
 
-extern uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
 extern Color SYSTEM_PALETTE[sizeof(Color) * 64];
+extern uint8_t frame[FRAME_WIDTH * FRAME_HEIGHT * 3];
 
 bool handle_input(CPU *cpu, SDL_Event *event);
+
+// Screen functions
+void draw_pixel(uint8_t *frame, int x, int y, Color color);
+void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n);
+
+// Color functions
 Color get_color(uint8_t byte);
 Color new_color(uint8_t red, uint8_t green, uint8_t blue);
-bool read_screen_state(CPU *cpu, uint8_t buffer[GAME_HEIGHT * GAME_WIDTH * 3]);
 
 void palette_initialize(void);
 

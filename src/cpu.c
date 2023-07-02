@@ -113,10 +113,11 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
         {
             return;
         }
-        if (read_screen_state(cpu, buffer))
+        // TODO: Update this later
+        if (1)    
         {
             SDL_RenderClear(renderer);
-            SDL_UpdateTexture(texture, NULL, buffer, GAME_WIDTH * 3);
+            SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
             SDL_RenderCopy(renderer, texture, NULL, NULL);
             SDL_RenderPresent(renderer);
             SDL_Delay(50);

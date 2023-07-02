@@ -1,11 +1,14 @@
 #include "../lib/io.h"
 #include "../lib/cpu.h"
+#include "../lib/cartridge.h"
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <stdint.h>
 
-uint8_t buffer[GAME_WIDTH * GAME_HEIGHT * 3];
 Color SYSTEM_PALETTE[sizeof(Color) * 64];
+uint8_t frame[FRAME_WIDTH * FRAME_HEIGHT * 3];
 
 // Returns true if program should stop
 bool handle_input(CPU *cpu, SDL_Event *event)
@@ -40,6 +43,78 @@ bool handle_input(CPU *cpu, SDL_Event *event)
     }
     return false;
 }
+
+// Colors pixel in frame array
+void draw_pixel(uint8_t *frame, int x, int y, Color color)
+{
+    int pixel = y * 3 * FRAME_WIDTH + x * 3;
+    // Checks if it's not out of bounds
+    if (pixel + 2 < FRAME_WIDTH * FRAME_HEIGHT * 3)
+    {
+        frame[pixel] = color.r;
+        frame[pixel + 1] = color.g;
+        frame[pixel + 2] = color.b;
+    }
+}
+
+// Renders tile on frame array
+void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n)
+{
+    bank *= 0x1000;
+    // Just for testing
+    int tile_x = 0;
+    int tile_y = 0;
+
+    for (int i = 0; i < 255; i++)
+    {
+        if (i != 0 && i % 20 == 0)
+        {
+            tile_y += 10;
+            tile_x = 0;
+        }
+        int tile_lower_bound = bank + i * 16;
+        int tile_upper_bound = tile_lower_bound + 15;
+        for (int y = 0; y < 8; y ++)
+        {
+
+            // Each pixel is represented by 2 bits in different bytes, 8 addresses apart
+            // Each tile is 16 bytes
+            uint8_t upper = chr_rom[tile_lower_bound + y];
+            uint8_t lower = chr_rom[tile_lower_bound + y + 8];
+
+            for (int x = 7; x >= 0; x--)
+            {
+                uint8_t value = (upper & 1) << 1 | (lower & 1);
+                // "Consume" the bits to go to the next one
+                upper >>= 1;
+                lower >>= 1;
+                Color color;
+                switch (value)
+                {
+                    case 0:
+                        color = SYSTEM_PALETTE[0x01];
+                        break;
+                    case 1:
+                        color = SYSTEM_PALETTE[0x23];
+                        break;
+                    case 2:
+                        color = SYSTEM_PALETTE[0x27];
+                        break;
+                    case 3:
+                        color = SYSTEM_PALETTE[0x30];
+                        break;
+                    default:
+                        fprintf(stderr, "Impossible color wih value %i chosen at 'render_tile'.\n", value);
+                        color = (Color) {0, 0, 0};
+                }
+                draw_pixel(frame, tile_x + x, tile_y + y, color);
+            }
+        }
+        tile_x += 10;
+    }
+}
+
+// Color functions
 
 Color get_color(uint8_t byte)
 {
@@ -87,24 +162,6 @@ Color new_color(uint8_t red, uint8_t green, uint8_t blue)
     color.g = green;
     color.b = blue;
     return color;
-}
-
-bool read_screen_state(CPU *cpu, uint8_t buffer[GAME_HEIGHT * GAME_WIDTH * 3])
-{
-    bool update = false;
-    for (int i = 0; i < GAME_HEIGHT * GAME_WIDTH; i++)
-    {
-        uint8_t read_memory = mem_read(cpu, SCREEN_MEM + i);
-        Color color = get_color(read_memory);
-        if (buffer[3 * i] != color.r || buffer[3 * i + 1] != color.g || buffer[3 * i + 2] != color.b)
-        {
-            buffer[3 * i] = color.r;
-            buffer[3 * i + 1] = color.g;
-            buffer[3 * i + 2] = color.b;
-            update = true;
-        }
-    }
-    return update;
 }
 
 // Initializes the SYSTEM_PALETTE array

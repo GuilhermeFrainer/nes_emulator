@@ -42,7 +42,7 @@ ROM *get_rom(char *file_path)
     uint8_t control_byte_1 = header[CONTROL_BYTE_1_ADDR];
     uint8_t control_byte_2 = header[CONTROL_BYTE_2_ADDR];
     //uint8_t prg_ram_length = header[PRG_RAM_LENGTH_ADDR]; IMPLEMENT LATER
-
+    /*
     if ((control_byte_2 & 0b00001111) != 0)
     {
         fprintf(stderr, "Error: file isn't in the iNES 1.0 format.\n");
@@ -50,6 +50,7 @@ ROM *get_rom(char *file_path)
         fclose(file);
         return NULL;
     }
+    */
     rom->mapper = (control_byte_2 & 0b11110000) | (control_byte_1 >> 4);
 
     // Determine mirroring type
