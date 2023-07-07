@@ -18,4 +18,7 @@ Sources on unofficial opcodes (not as good as the ones on official opcodes):
 https://www.nesdev.org/undocumented_opcodes.txt (useful, but sometimes contains errors)  
 https://www.nesdev.org/wiki/Programming_with_unofficial_opcodes (seems to correct the errors on the above link)  
 
-MOS 6500 family programming manual: http://archive.6502.org/books/mcs6500_family_programming_manual.pdf
+MOS 6500 family programming manual: http://archive.6502.org/books/mcs6500_family_programming_manual.pdf  
+
+javidx9's excellent video series on making an NES Emulator:
+https://www.youtube.com/playlist?list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf

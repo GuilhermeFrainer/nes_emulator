@@ -39,6 +39,15 @@ uint8_t bus_mem_read(Bus *bus, uint16_t addr)
         fprintf(stderr, "Tried to read write-only ppu register at %04X\n", addr);
         return 0;
     }
+    // Read from the status register
+    else if (addr == 0x2002)
+    {
+        // Reads only the 3 most significant bits. The other 5 come from the buffer
+        uint8_t data = (bus->ppu->status & 0xE0) | (bus->ppu->internal_data_buffer & 0x1F);
+        ppu_status_bit_unset(bus->ppu, VBLANK_STARTED); // Reading unsets the VBLANK flag
+        bus->ppu->address.high_pointer = true; // Also resets the pointer of the address register
+        return data;
+    }
     else if (addr == 0x2007)
     {
         return ppu_mem_read(bus->ppu);
@@ -107,6 +116,7 @@ void bus_mem_write(Bus *bus, uint8_t value, uint16_t addr)
                 return;
             case 0x2007:
                 ppu_write_to_ppu_data(bus->ppu, value);
+                    ppu_vram_addr_increment(bus->ppu); // Writing to the data register increments the addr register
                 return;
             default:
                 fprintf(stderr, "Tried to access unknown PPU register: %04X.\n", addr);

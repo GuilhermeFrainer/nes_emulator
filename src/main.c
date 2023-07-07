@@ -133,7 +133,6 @@ int main(int argc, char **argv)
         }
     }
 
-    cleanup:
     // Cleanup
     //destroy_cpu(cpu);
     SDL_DestroyTexture(texture);

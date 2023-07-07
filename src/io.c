@@ -73,7 +73,6 @@ void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n)
             tile_x = 0;
         }
         int tile_lower_bound = bank + i * 16;
-        int tile_upper_bound = tile_lower_bound + 15;
         for (int y = 0; y < 8; y ++)
         {
 

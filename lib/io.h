@@ -8,7 +8,7 @@
 #define FRAME_WIDTH 256
 #define FRAME_HEIGHT 240
 
-#define SCALE 5
+#define SCALE 2
 
 #define SCREEN_MEM 0x0200
 #define SCREEN_SIZE 0x0400
