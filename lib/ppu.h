@@ -7,6 +7,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct AddrRegister {
+    uint8_t value[2];
+    bool high_pointer;
+} AddrRegister;
+
 typedef struct PPU {
     // Registers
     uint8_t controller; // 0x2000
@@ -15,6 +20,7 @@ typedef struct PPU {
     uint8_t oam_addr; // 0x2003
     uint8_t oam_data_reg; // 0x2004
     uint8_t scroll; // 0x2005
+    AddrRegister addr; // 0x2006
     uint8_t data; // 0x2007
     uint8_t oam_dma; // 0x4014
     
@@ -109,5 +115,13 @@ void ppu_write_to_scroll(PPU *ppu, uint8_t value);
 void ppu_write_to_ppu_addr(PPU *ppu, uint8_t value);
 void ppu_write_to_ppu_data(PPU *ppu, uint8_t value);
 void ppu_write_to_oam_dma(PPU *ppu, uint8_t value);
+
+// AddrRegister functions
+AddrRegister addrregister_new(void);
+void addrregister_set(AddrRegister addr_reg, uint16_t value);
+void addrregister_update(AddrRegister addr_reg, uint8_t value);
+void addrregister_increment(AddrRegister addr_reg, uint8_t value);
+void addrregister_reset_pointer(AddrRegister addr_reg);
+uint16_t addrregister_get(AddrRegister addr_reg);
 
 #endif

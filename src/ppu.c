@@ -18,6 +18,7 @@ PPU *ppu_new(uint8_t *chr_rom, Mirroring mirroring) {
     ppu->oam_addr = 0;
     ppu->oam_data_reg = 0;
     ppu->scroll = 0;
+    ppu->addr = addrregister_new();
     ppu->data = 0;
     ppu->oam_dma = 0;
 
@@ -162,4 +163,58 @@ void ppu_write_to_ppu_data(PPU *ppu, uint8_t value) {
 // Writes value to PPU OAM DMA register
 void ppu_write_to_oam_dma(PPU *ppu, uint8_t value) {
     ppu->oam_dma = value;
+}
+
+// AddrRegister functions
+
+// Instantiates new AddrRegister
+AddrRegister addrregister_new(void) {
+    AddrRegister addr_reg;
+    addr_reg.value[0] = 0;
+    addr_reg.value[1] = 0;
+    addr_reg.high_pointer = true;
+    return addr_reg;
+}
+
+// Sets the PPU address register to a new value
+// Mirrors down addresses above 0x3FFF
+void addrregister_set(AddrRegister addr_reg, uint16_t value) {
+    value &= 0x3FFF;
+    addr_reg.value[0] = value >> 8;
+    addr_reg.value[1] = value & 0xFF;
+}
+
+// Updates one byte of the PPU's address register
+void addrregister_update(AddrRegister addr_reg, uint8_t value) {
+    if (addr_reg.high_pointer) {
+        addr_reg.value[0] = value;
+    }
+    else {
+        addr_reg.value[1] = value;
+    }
+    // Mirrors down any addresses above 0x3FFF
+    uint16_t new_value = addrregister_get(addr_reg);
+    addrregister_set(addr_reg, new_value & 0x3FFF);
+    addr_reg.high_pointer = !addr_reg.high_pointer;
+}
+
+// Increments the PPU's address register's value by 'value'
+// Handles wrap-around
+void addrregister_increment(AddrRegister addr_reg, uint8_t value) {
+    uint8_t low = addr_reg.value[1];
+    addr_reg.value[1] += value;
+    if (low > addr_reg.value[1]) {
+        addr_reg.value[0]++;
+    }
+    // Mirrors down addresses above 0x3FFF
+    uint16_t new_value = addrregister_get(addr_reg);
+    addrregister_set(addr_reg, new_value);
+}
+
+void addrregister_reset_pointer(AddrRegister addr_reg) {
+    addr_reg.high_pointer = true;
+}
+
+uint16_t addrregister_get(AddrRegister addr_reg) {
+    return (uint16_t) addr_reg.value[0] << 8 | addr_reg.value[1];
 }

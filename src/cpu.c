@@ -86,7 +86,6 @@ void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture) {
         switch (bus_tick(cpu->bus, cycles)) {
             case NMI:
                 interrupt(cpu, NMI);
-                printf("Interrupt\n");
                 SDL_RenderClear(renderer);
                 SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
                 SDL_RenderCopy(renderer, texture, NULL, NULL);
