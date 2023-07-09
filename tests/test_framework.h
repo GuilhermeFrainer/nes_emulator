@@ -12,14 +12,11 @@
 #define end_tests() printf("Testing over:\nSucceeded: %i\nFailed: %i\n", successful_tests, failed_tests);
 
 // Run program for testing purposes only i.e., with no io
-void run_for_testing(CPU *cpu)
-{
-    while (1)
-    {
+void run_for_testing(CPU *cpu) {
+    while (1) {
         uint8_t opcode = mem_read(cpu, cpu->program_counter);
         interpret(cpu, opcode);
-        if (opcode == 0x00)
-        {
+        if (opcode == 0x00) {
             return;
         }
     }

@@ -11,17 +11,13 @@ Color SYSTEM_PALETTE[sizeof(Color) * 64];
 uint8_t frame[FRAME_WIDTH * FRAME_HEIGHT * 3];
 
 // Returns true if program should stop
-bool handle_input(CPU *cpu, SDL_Event *event)
-{
-    while(SDL_PollEvent(event))
-    {
-        switch (event->type)
-        {
+bool handle_input(CPU *cpu, SDL_Event *event) {
+    while(SDL_PollEvent(event)) {
+        switch (event->type) {
             case SDL_QUIT:
                 return true;
             case SDL_KEYDOWN:
-                switch (event->key.keysym.sym)
-                {
+                switch (event->key.keysym.sym) {
                     case SDLK_UP:
                         mem_write(cpu, 0x77, INPUT_ADDR);
                         break;
@@ -45,12 +41,10 @@ bool handle_input(CPU *cpu, SDL_Event *event)
 }
 
 // Colors pixel in frame array
-void draw_pixel(uint8_t *frame, int x, int y, Color color)
-{
+void draw_pixel(uint8_t *frame, int x, int y, Color color) {
     int pixel = y * 3 * FRAME_WIDTH + x * 3;
     // Checks if it's not out of bounds
-    if (pixel + 2 < FRAME_WIDTH * FRAME_HEIGHT * 3)
-    {
+    if (pixel + 2 < FRAME_WIDTH * FRAME_HEIGHT * 3) {
         frame[pixel] = color.r;
         frame[pixel + 1] = color.g;
         frame[pixel + 2] = color.b;
@@ -58,38 +52,32 @@ void draw_pixel(uint8_t *frame, int x, int y, Color color)
 }
 
 // Renders tile on frame array
-void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n)
-{
+void render_tiles(uint8_t *frame, uint8_t *chr_rom, int bank) {
     bank *= 0x1000;
     // Just for testing
     int tile_x = 0;
     int tile_y = 0;
 
-    for (int i = 0; i < 255; i++)
-    {
-        if (i != 0 && i % 20 == 0)
-        {
+    for (int i = 0; i < 255; i++) {
+        if (i != 0 && i % 20 == 0) {
             tile_y += 10;
             tile_x = 0;
         }
         int tile_lower_bound = bank + i * 16;
-        for (int y = 0; y < 8; y ++)
-        {
+        for (int y = 0; y < 8; y ++) {
 
             // Each pixel is represented by 2 bits in different bytes, 8 addresses apart
             // Each tile is 16 bytes
             uint8_t upper = chr_rom[tile_lower_bound + y];
             uint8_t lower = chr_rom[tile_lower_bound + y + 8];
 
-            for (int x = 7; x >= 0; x--)
-            {
+            for (int x = 7; x >= 0; x--) {
                 uint8_t value = (upper & 1) << 1 | (lower & 1);
                 // "Consume" the bits to go to the next one
                 upper >>= 1;
                 lower >>= 1;
                 Color color;
-                switch (value)
-                {
+                switch (value) {
                     case 0:
                         color = SYSTEM_PALETTE[0x01];
                         break;
@@ -115,10 +103,8 @@ void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n)
 
 // Color functions
 
-Color get_color(uint8_t byte)
-{
-    switch (byte)
-    {
+Color get_color(uint8_t byte) {
+    switch (byte) {
         // Black
         case 0: return new_color(0, 0, 0);
         // White
@@ -154,8 +140,7 @@ Color get_color(uint8_t byte)
     return new_color(0, 0, 0);
 }
 
-Color new_color(uint8_t red, uint8_t green, uint8_t blue)
-{
+Color new_color(uint8_t red, uint8_t green, uint8_t blue) {
     Color color;
     color.r = red;
     color.g = green;
@@ -164,8 +149,7 @@ Color new_color(uint8_t red, uint8_t green, uint8_t blue)
 }
 
 // Initializes the SYSTEM_PALETTE array
-void palette_initialize()
-{
+void palette_initialize() {
     Color temp_array[] = {
         (Color) {0x80, 0x80, 0x80},
         (Color) {0x00, 0x3D, 0xA6},

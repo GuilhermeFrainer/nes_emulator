@@ -6,8 +6,7 @@
 
 typedef struct CPU CPU;
 
-typedef enum AddrMode
-{
+typedef enum AddrMode {
     Immediate,
 
     ZeroPage,
@@ -27,8 +26,7 @@ typedef enum AddrMode
     Relative
 } AddrMode;
 
-typedef struct Instruction
-{
+typedef struct Instruction {
     uint8_t opcode;
     char mnemonic[5];
     int bytes;

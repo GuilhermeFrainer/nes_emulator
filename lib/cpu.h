@@ -10,8 +10,7 @@ typedef struct Bus Bus;
 typedef struct ROM ROM;
 typedef enum Interrupt Interrupt;
 
-typedef struct CPU
-{
+typedef struct CPU {
     uint8_t status;
     uint16_t program_counter;
     uint8_t stack_pointer;

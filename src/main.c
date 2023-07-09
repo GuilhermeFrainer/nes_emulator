@@ -10,28 +10,23 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int main(int argc, char **argv)
-{
-    if (argc > 2)
-    {
+int main(int argc, char **argv) {
+    if (argc > 2) {
         fprintf(stderr, "Too many arguments provided. Expected 1, received %i.\n", argc - 1);
         return 1;
     }
-    else if (argc < 2)
-    {
+    else if (argc < 2) {
         fprintf(stderr, "Too few arguments provided. Expected 1, received %i.\n", argc - 1);
         return 1;
     }
 
     ROM *rom = get_rom(argv[1]);
-    if (rom == NULL)
-    {
+    if (rom == NULL) {
         return 1;
     }
     
     // SDL Inits
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-    {
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "SDL_Init() failed. Error: %s\n", SDL_GetError());
         return 1;
     }
@@ -44,15 +39,13 @@ int main(int argc, char **argv)
         FRAME_HEIGHT * SCALE,
         SDL_WINDOW_SHOWN
     );
-    if (window == NULL)
-    {
+    if (window == NULL) {
         fprintf(stderr, "Error in creating window: %s\n", SDL_GetError());
         return 1;
     }
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL)
-    {
+    if (renderer == NULL) {
         fprintf(stderr, "Error in creating renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -60,8 +53,7 @@ int main(int argc, char **argv)
     }
 
     
-    if (SDL_RenderSetLogicalSize(renderer, FRAME_WIDTH, FRAME_HEIGHT) != 0)
-    {
+    if (SDL_RenderSetLogicalSize(renderer, FRAME_WIDTH, FRAME_HEIGHT) != 0) {
         fprintf(stderr, "Error in setting logical size: %s\n", SDL_GetError());
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -69,8 +61,7 @@ int main(int argc, char **argv)
         return 1;
     }
     
-    if (SDL_RenderSetScale(renderer, SCALE, SCALE) != 0)
-    {
+    if (SDL_RenderSetScale(renderer, SCALE, SCALE) != 0) {
         fprintf(stderr, "Error in setting scale: %s\n", SDL_GetError());
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -87,8 +78,7 @@ int main(int argc, char **argv)
         FRAME_HEIGHT
     );
 
-    if (texture == NULL)
-    {
+    if (texture == NULL) {
         fprintf(stderr, "Error in creating texture: %s\n", SDL_GetError());
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -97,14 +87,15 @@ int main(int argc, char **argv)
     }
 
     palette_initialize();
-    render_tile(frame, rom->chr_rom, 1, 1);
-    /*
+    render_tiles(frame, rom->chr_rom, 0);
     CPU *cpu = new_cpu(rom);
     populate_inst_list();
-    load(cpu);
+    //load(cpu);
     reset(cpu);
     run(cpu, renderer, texture);
-    */
+    
+    /*
+
     SDL_RenderClear(renderer);
     SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -113,18 +104,28 @@ int main(int argc, char **argv)
     bool running = true;
     SDL_Event event;
     
-    while (running)
-    {
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
                 case SDL_QUIT:
                     running = false;
                     break;
                 case SDL_KEYDOWN:
-                    switch (event.key.keysym.sym)
-                    {
+                    switch (event.key.keysym.sym) {
+                        case SDLK_1:
+                            render_tiles(frame, rom->chr_rom, 0);
+                            SDL_RenderClear(renderer);
+                            SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
+                            SDL_RenderCopy(renderer, texture, NULL, NULL);
+                            SDL_RenderPresent(renderer);
+                            break;
+                        case SDLK_2:
+                            render_tiles(frame, rom->chr_rom, 1);
+                            SDL_RenderClear(renderer);
+                            SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
+                            SDL_RenderCopy(renderer, texture, NULL, NULL);
+                            SDL_RenderPresent(renderer);
+                            break;
                         case SDLK_ESCAPE:
                             running = false;
                             break;
@@ -132,9 +133,10 @@ int main(int argc, char **argv)
             }
         }
     }
-
+    
+    */
     // Cleanup
-    //destroy_cpu(cpu);
+    destroy_cpu(cpu);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

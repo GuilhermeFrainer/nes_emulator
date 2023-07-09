@@ -16,11 +16,9 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst);
 void run_and_log(CPU *cpu);
 void enter_log(CPU *cpu, FILE *file, Instruction inst);
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     ROM *rom = get_rom(NES_TEST_PATH);
-    if (rom == NULL)
-    {
+    if (rom == NULL) {
         return 1;
     }
     CPU *cpu = new_cpu(rom);
@@ -34,8 +32,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void write_line_string(char *line_string, CPU *cpu, Instruction inst)
-{
+void write_line_string(char *line_string, CPU *cpu, Instruction inst) {
     // Pointer to keep track of the last character
     int last_char_position = 0;
 
@@ -47,8 +44,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
     );
 
     // Handles the hex opcode
-    switch (inst.bytes)
-    {
+    switch (inst.bytes) {
         case 3:
             last_char_position += sprintf(
                 line_string + last_char_position,
@@ -86,13 +82,11 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
     uint8_t operand;
 
     // Creates space for unofficial opcodes' * character
-    if (strlen(inst.mnemonic) == 4)
-    {
+    if (strlen(inst.mnemonic) == 4) {
         last_char_position--;
     }
 
-    switch (inst.mode)
-    {
+    switch (inst.mode) {
         case Immediate:
             last_char_position += sprintf(
                 line_string + last_char_position,
@@ -135,8 +129,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case Absolute:
-            if (inst.opcode == 0x4C || inst.opcode == 0x20)
-            {
+            if (inst.opcode == 0x4C || inst.opcode == 0x20) {
                 last_char_position += sprintf(
                     line_string + last_char_position,
                     "%s $%04X",
@@ -144,8 +137,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
                     addr
                 );
             }
-            else
-            {
+            else {
                 last_char_position += sprintf(
                     line_string + last_char_position,
                     "%s $%04X = %02X",
@@ -219,8 +211,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
             break;
 
         case Implied:
-            switch (inst.opcode)
-            {
+            switch (inst.opcode) {
                 // Handles accumulator instructions
                 case 0x0A:
                 case 0x4A:
@@ -255,8 +246,7 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
 
 
     // Fills the rest of the assembly opcode area with spaces
-    for (; last_char_position < CPU_REGS_POSITION; last_char_position++)
-    {
+    for (; last_char_position < CPU_REGS_POSITION; last_char_position++) {
         line_string[last_char_position] = ' ';
     }
 
@@ -279,24 +269,20 @@ void write_line_string(char *line_string, CPU *cpu, Instruction inst)
     return;
 }
 
-void run_and_log(CPU *cpu)
-{
+void run_and_log(CPU *cpu) {
     FILE *file = fopen("tests/my_log.log", "w");
-    if (file == NULL)
-    {
+    if (file == NULL) {
         fprintf(stderr, "Something went wrong while creating a file\n");
         return;
     }
 
-    while (1)
-    {
+    while (1) {
         uint8_t opcode = mem_read(cpu, cpu->program_counter);
         Instruction inst = inst_list[opcode];
         
         enter_log(cpu, file, inst);
         interpret(cpu, opcode);
-        if (opcode == 0x00)
-        {
+        if (opcode == 0x00) {
             printf("Breaking at %X\n", cpu->program_counter);
             break;
         }
@@ -305,8 +291,7 @@ void run_and_log(CPU *cpu)
     fclose(file);
 }
 
-void enter_log(CPU *cpu, FILE *file, Instruction inst)
-{
+void enter_log(CPU *cpu, FILE *file, Instruction inst) {
     char string_to_write[LINE_LENGTH];
     write_line_string(string_to_write, cpu, inst);
     fwrite(string_to_write, strlen(string_to_write) * sizeof(char), 1, file);

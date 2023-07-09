@@ -19,8 +19,7 @@ void test_stack(void);
 int successful_tests = 0;
 int failed_tests = 0;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     test_new();
     test_read_and_mem_write();
     test_reset();
@@ -33,8 +32,7 @@ int main(int argc, char **argv)
     end_tests();
 }
 
-void test_new(void)
-{
+void test_new(void) {
     CPU *cpu = new_cpu();
     assert_eq(cpu->status, 0);
     assert_eq(cpu->reg_a, 0);
@@ -44,8 +42,7 @@ void test_new(void)
     free(cpu);
 }
 
-void test_read_and_mem_write(void)
-{
+void test_read_and_mem_write(void) {
     CPU *cpu = new_cpu();
     mem_write(cpu, 0xAB, 0x8000);
     assert_eq(cpu->memory[0x8000], 0xAB);
@@ -59,8 +56,7 @@ void test_read_and_mem_write(void)
     free(cpu);
 }
 
-void test_reset(void)
-{
+void test_reset(void) {
     CPU *cpu = new_cpu();
     cpu->reg_a = 10;
     cpu->reg_x = 25;
@@ -76,8 +72,7 @@ void test_reset(void)
     free(cpu);
 }
 
-void test_load(void)
-{
+void test_load(void) {
     CPU *cpu = new_cpu();
     uint8_t program[3] = { 0xAB, 0xCD, 0xDE };
     load(cpu, program, 3);
@@ -93,8 +88,7 @@ void test_load(void)
     free(cpu);
 }
 
-void test_run(void)
-{
+void test_run(void) {
     CPU *cpu = new_cpu();
     populate_inst_list();
     
@@ -108,8 +102,7 @@ void test_run(void)
     free(cpu);
 }
 
-void test_set_unset_flag(void)
-{
+void test_set_unset_flag(void) {
     CPU *cpu = new_cpu();
     set_flag(cpu, NEGATIVE_FLAG);
 
@@ -123,8 +116,7 @@ void test_set_unset_flag(void)
     free(cpu);
 }
 
-void test_is_set(void)
-{
+void test_is_set(void) {
     CPU *cpu = new_cpu();
     set_flag(cpu, NEGATIVE_FLAG);
     assert_eq(is_set(cpu, NEGATIVE_FLAG), true);
@@ -132,16 +124,14 @@ void test_is_set(void)
     free(cpu);
 }
 
-void test_get_stack_addr(void)
-{
+void test_get_stack_addr(void) {
     CPU *cpu = new_cpu();
     cpu->stack_pointer = 0xAA;
     assert_eq(get_stack_addr(cpu), 0x01AA);
     free(cpu);
 }
 
-void test_stack(void)
-{
+void test_stack(void) {
     CPU *cpu = new_cpu();
     cpu->stack_pointer = 0xFF;
     stack_push_u16(cpu, 0xAABB);

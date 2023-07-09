@@ -9,8 +9,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 
-CPU *new_cpu(ROM *rom)
-{
+CPU *new_cpu(ROM *rom) {
     CPU *cpu = malloc(sizeof(CPU));
     cpu->status = 0;
     cpu->program_counter = 0;
@@ -22,8 +21,7 @@ CPU *new_cpu(ROM *rom)
     return cpu;
 }
 
-void destroy_cpu(CPU *cpu)
-{
+void destroy_cpu(CPU *cpu) {
     free(cpu->bus->rom->prg_rom);
     free(cpu->bus->rom->chr_rom);
     free(cpu->bus->rom);
@@ -32,35 +30,30 @@ void destroy_cpu(CPU *cpu)
     free(cpu);
 }
 
-uint8_t mem_read(CPU *cpu, uint16_t addr)
-{
+uint8_t mem_read(CPU *cpu, uint16_t addr) {
     return bus_mem_read(cpu->bus, addr);
 }
 
 // Deals with NES's little-endianess
-uint16_t mem_read_u16(CPU *cpu, uint16_t addr)
-{
+uint16_t mem_read_u16(CPU *cpu, uint16_t addr) {
     uint16_t low = mem_read(cpu, addr);
     uint16_t high = mem_read(cpu, addr + 1);
     high = high << 8;
     return high | low;
 }
 
-void mem_write(CPU *cpu, uint8_t value, uint16_t addr)
-{
+void mem_write(CPU *cpu, uint8_t value, uint16_t addr) {
     bus_mem_write(cpu->bus, value, addr);
 }
 
-void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr)
-{
+void mem_write_u16(CPU *cpu, uint16_t value, uint16_t addr) {
     uint8_t low = value & 0xFF;
     uint8_t high = value >> 8;
     mem_write(cpu, low, addr);
     mem_write(cpu, high, addr + 1);
 }
 
-void reset(CPU *cpu)
-{
+void reset(CPU *cpu) {
     cpu->reg_a = 0;
     cpu->reg_x = 0;
     cpu->reg_y = 0;
@@ -69,8 +62,7 @@ void reset(CPU *cpu)
     cpu->stack_pointer = STACK_RESET;
 }
 
-void load(CPU *cpu)
-{
+void load(CPU *cpu) {
     uint8_t low = PROGRAM_START & 0xFF;
     uint8_t high = PROGRAM_START >> 8;
     
@@ -80,60 +72,47 @@ void load(CPU *cpu)
     cpu->program_counter = PROGRAM_START;
 }
 
-void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture)
-{
+void run(CPU *cpu, SDL_Renderer *renderer, SDL_Texture *texture) {
     SDL_Event event;
     
-    while (1)
-    {
-        Interrupt interrupt_type = bus_poll_for_interrupt(cpu->bus);
-        switch (interrupt_type)
-        {
+    while (1) {
+        uint8_t opcode = mem_read(cpu, cpu->program_counter);
+        int cycles_before_inst = cpu->bus->cycles;
+        interpret(cpu, opcode);
+        int cycles = cpu->bus->cycles - cycles_before_inst;
+        if (opcode == 0x00) {
+            return;
+        }
+        switch (bus_tick(cpu->bus, cycles)) {
             case NMI:
-                interrupt(cpu, interrupt_type);
+                interrupt(cpu, NMI);
+                printf("Interrupt\n");
+                SDL_RenderClear(renderer);
+                SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
+                SDL_RenderCopy(renderer, texture, NULL, NULL);
+                SDL_RenderPresent(renderer);
                 break;
             case IRQ:
-                if (!is_set(cpu, INTERRUPT_FLAG))
-                {
-                    interrupt(cpu, interrupt_type);
+                if (!is_set(cpu, INTERRUPT_FLAG)) {
+                    interrupt(cpu, IRQ);
                 }
                 break;
             case None:
                 break;
         }
-
-        uint8_t opcode = mem_read(cpu, cpu->program_counter);
-        mem_write(cpu, (rand() % 256) + 1, RAND_NUM_ADDR);
-        interpret(cpu, opcode);
-        if (opcode == 0x00)
-        {
+        if (handle_input(cpu, &event)) {
             return;
-        }
-        if (handle_input(cpu, &event))
-        {
-            return;
-        }
-        // TODO: Update this later
-        if (1)    
-        {
-            SDL_RenderClear(renderer);
-            SDL_UpdateTexture(texture, NULL, frame, FRAME_WIDTH * 3);
-            SDL_RenderCopy(renderer, texture, NULL, NULL);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(50);
         }
     }
 }   
         
-void interpret(CPU *cpu, uint8_t opcode)
-{
+void interpret(CPU *cpu, uint8_t opcode) {
     Instruction inst = inst_list[opcode];
     uint16_t original_pc_state = cpu->program_counter;
     cpu->program_counter++;
     bool branch = false;
 
-    switch (opcode)
-    {
+    switch (opcode) {
         case 0x69:
         case 0x65:
         case 0x75:
@@ -654,23 +633,22 @@ void interpret(CPU *cpu, uint8_t opcode)
             fprintf(stderr, "Attempted to run unknown opcode: %x\n", opcode);
             break;
     }
-    if (!branch)
-    {
+    if (!branch) {
         cpu->program_counter = original_pc_state + inst.bytes;
     }
+    cpu->bus->cycles += inst.cycles;
 }
 
 // Execute interrupt
-void interrupt(CPU *cpu, Interrupt interrupt_type)
-{
+void interrupt(CPU *cpu, Interrupt interrupt_type) {
     stack_push_u16(cpu, cpu->program_counter);
     stack_push(cpu, cpu->status);
     set_flag(cpu, INTERRUPT_FLAG);
 
+    cpu->bus->cycles += 7;
     bus_tick(cpu->bus, 7); // Interrupt takes 7 cycles
     // Places interrupt vector's address on the program counter
-    switch (interrupt_type)
-    {
+    switch (interrupt_type) {
         case IRQ:
             cpu->program_counter = mem_read_u16(cpu, 0xFFFE);
             break;
@@ -685,74 +663,63 @@ void interrupt(CPU *cpu, Interrupt interrupt_type)
 
 // Register functions
 
-void set_reg_a(CPU *cpu, uint8_t value)
-{
+void set_reg_a(CPU *cpu, uint8_t value) {
     cpu->reg_a = value;
     update_zero_and_negative_flags(cpu, value);
 }
 
-void set_reg_x(CPU *cpu, uint8_t value)
-{
+void set_reg_x(CPU *cpu, uint8_t value) {
     cpu->reg_x = value;
     update_zero_and_negative_flags(cpu, value);
 }
 
-void set_reg_y(CPU *cpu, uint8_t value)
-{
+void set_reg_y(CPU *cpu, uint8_t value) {
     cpu->reg_y = value;
     update_zero_and_negative_flags(cpu, value);
 }
 
 // Flag functions
 
-void set_flag(CPU *cpu, uint8_t flag)
-{
+void set_flag(CPU *cpu, uint8_t flag) {
     cpu->status |= flag;
 }
 
-void unset_flag(CPU *cpu, uint8_t flag)
-{
+void unset_flag(CPU *cpu, uint8_t flag) {
     cpu->status &= ~flag;
 }
 
-bool is_set(CPU *cpu, uint8_t flag)
-{
+bool is_set(CPU *cpu, uint8_t flag) {
     return ((cpu->status & flag) != 0) ? true : false;
 }
 
 // Stack functions
 
-uint16_t get_stack_addr(CPU *cpu)
-{
+uint16_t get_stack_addr(CPU *cpu) {
     uint16_t stack_pointer = (uint16_t) cpu->stack_pointer;
     return STACK | stack_pointer;
 }
 
-void stack_push(CPU *cpu, uint8_t value)
-{
+void stack_push(CPU *cpu, uint8_t value) {
     uint16_t addr = get_stack_addr(cpu);
     mem_write(cpu, value, addr);
     cpu->stack_pointer--;
 }
 
-void stack_push_u16(CPU *cpu, uint16_t value)
-{
+void stack_push_u16(CPU *cpu, uint16_t value) {
     uint8_t high = value >> 8;
     uint8_t low = value & 0xFF;
     stack_push(cpu, high);
     stack_push(cpu, low);
 }
 
-uint8_t stack_pull(CPU *cpu)
-{
+uint8_t stack_pull(CPU *cpu) {
     cpu->stack_pointer++;
     uint16_t addr = get_stack_addr(cpu);
     uint8_t value = mem_read(cpu, addr);
     return value;
 }
 
-uint16_t stack_pull_u16(CPU *cpu)
-{
+uint16_t stack_pull_u16(CPU *cpu) {
     uint16_t low = (uint16_t) stack_pull(cpu);
     uint16_t high = (uint16_t) stack_pull(cpu) << 8;
     return high | low;

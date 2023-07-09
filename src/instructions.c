@@ -7,19 +7,15 @@
 
 Instruction inst_list[0x100];
 
-void populate_inst_list(void)
-{
-    for (int i = 0x00; i < 0x100; i++)
-    {
+void populate_inst_list(void) {
+    for (int i = 0x00; i < 0x100; i++) {
         inst_list[i] = get_instruction_from_opcode(i);
     }
 }
 
-Instruction get_instruction_from_opcode(uint8_t opcode)
-{
+Instruction get_instruction_from_opcode(uint8_t opcode) {
     Instruction inst;
-    switch (opcode)
-    {
+    switch (opcode) {
         // opcode, mnemonic, bytes, cycles, mode
         // In alphabetical order of mnemonics
         // Some are grouped by functionality, but that is just an alphabetical coincidence
@@ -401,26 +397,22 @@ Instruction get_instruction_from_opcode(uint8_t opcode)
 
 // Instructions
 
-void adc(CPU *cpu, AddrMode mode)
-{
+void adc(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     add_with_carry(cpu, operand);
 }
 
-void and(CPU *cpu, AddrMode mode)
-{
+void and(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     set_reg_a(cpu, cpu->reg_a & operand);
 }
 
-void asl_acc(CPU *cpu)
-{
+void asl_acc(CPU *cpu) {
     update_carry_flag(cpu, cpu->reg_a);
     set_reg_a(cpu, cpu->reg_a << 1);
 }
 
-void asl(CPU *cpu, AddrMode mode)
-{
+void asl(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t value = mem_read(cpu, addr);
     update_carry_flag(cpu, value);
@@ -431,145 +423,118 @@ void asl(CPU *cpu, AddrMode mode)
 
 // Branch instructions part 1
 
-void bcc(CPU *cpu)
-{
+void bcc(CPU *cpu) {
     branch(cpu, !is_set(cpu, CARRY_FLAG));
 }
 
-void bcs(CPU *cpu)
-{
+void bcs(CPU *cpu) {
     branch(cpu, is_set(cpu, CARRY_FLAG));
 }
 
-void beq(CPU *cpu)
-{
+void beq(CPU *cpu) {
     branch(cpu, is_set(cpu, ZERO_FLAG));
 }
 
-void bit(CPU *cpu, AddrMode mode)
-{
+void bit(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
 
     ((cpu->reg_a & operand) == 0) ? set_flag(cpu, ZERO_FLAG) : unset_flag(cpu, ZERO_FLAG);
     
     // Set V flag to operand 6th bit
-    if ((operand & 0b01000000) != 0)
-    {
+    if ((operand & 0b01000000) != 0) {
         set_flag(cpu, OVERFLOW_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, OVERFLOW_FLAG);
     }
 
     // Set N flag to operand 7th bit
-    if ((operand & 0b10000000) != 0)
-    {
+    if ((operand & 0b10000000) != 0) {
         set_flag(cpu, NEGATIVE_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, NEGATIVE_FLAG);
     }
 }
 
 // Branch instructions part 2
 
-void bmi(CPU *cpu)
-{
+void bmi(CPU *cpu) {
     branch(cpu, is_set(cpu, NEGATIVE_FLAG));
 }
 
-void bne(CPU *cpu)
-{
+void bne(CPU *cpu) {
     branch(cpu, !is_set(cpu, ZERO_FLAG));
 }
 
-void bpl(CPU *cpu)
-{
+void bpl(CPU *cpu) {
     branch(cpu, !is_set(cpu, NEGATIVE_FLAG));
 }
 
-void brk(CPU *cpu)
-{
+void brk(CPU *cpu) {
     return;
 }
 
 // Branch instructions part 3
 
-void bvc(CPU *cpu)
-{
+void bvc(CPU *cpu) {
     branch(cpu, !is_set(cpu, OVERFLOW_FLAG));
 }
 
-void bvs(CPU *cpu)
-{
+void bvs(CPU *cpu) {
     branch(cpu, is_set(cpu, OVERFLOW_FLAG));
 }
 
 // Clear flag instructions
 
-void clc(CPU *cpu)
-{
+void clc(CPU *cpu) {
     unset_flag(cpu, CARRY_FLAG);
 }
 
-void cld(CPU *cpu)
-{
+void cld(CPU *cpu) {
     unset_flag(cpu, DECIMAL_FLAG);
 }
 
-void cli(CPU *cpu)
-{
+void cli(CPU *cpu) {
     unset_flag(cpu, INTERRUPT_FLAG);
 }
 
-void clv(CPU *cpu)
-{
+void clv(CPU *cpu) {
     unset_flag(cpu, OVERFLOW_FLAG);
 }
 
 // Compare instructions
 
-void cmp(CPU *cpu, AddrMode mode)
-{
+void cmp(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
-    if (cpu->reg_a >= operand)
-    {
+    if (cpu->reg_a >= operand) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     uint8_t result = cpu->reg_a - operand;
     update_zero_and_negative_flags(cpu, result);
 }
 
-void cpx(CPU *cpu, AddrMode mode)
-{
+void cpx(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
-    if (cpu->reg_x >= operand)
-    {
+    if (cpu->reg_x >= operand) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     uint8_t result = cpu->reg_x - operand;
     update_zero_and_negative_flags(cpu, result);
 }
 
-void cpy(CPU *cpu, AddrMode mode)
-{
+void cpy(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
-    if (cpu->reg_y >= operand)
-    {
+    if (cpu->reg_y >= operand) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     uint8_t result = cpu->reg_y - operand;
@@ -578,8 +543,7 @@ void cpy(CPU *cpu, AddrMode mode)
 
 // Decrement instructions
 
-void dec(CPU *cpu, AddrMode mode)
-{
+void dec(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
     operand--;
@@ -587,20 +551,17 @@ void dec(CPU *cpu, AddrMode mode)
     update_zero_and_negative_flags(cpu, operand);
 }
 
-void dex(CPU *cpu)
-{
+void dex(CPU *cpu) {
     cpu->reg_x--;
     update_zero_and_negative_flags(cpu, cpu->reg_x);
 }
 
-void dey(CPU *cpu)
-{
+void dey(CPU *cpu) {
     cpu->reg_y--;
     update_zero_and_negative_flags(cpu, cpu->reg_y);
 }
 
-void eor(CPU *cpu, AddrMode mode)
-{
+void eor(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     cpu->reg_a ^= operand;
     update_zero_and_negative_flags(cpu, cpu->reg_a); 
@@ -608,8 +569,7 @@ void eor(CPU *cpu, AddrMode mode)
 
 // Increment instruction
 
-void inc(CPU *cpu, AddrMode mode)
-{
+void inc(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
     operand++;
@@ -617,27 +577,23 @@ void inc(CPU *cpu, AddrMode mode)
     update_zero_and_negative_flags(cpu, operand);
 }
 
-void inx(CPU *cpu)
-{
+void inx(CPU *cpu) {
     cpu->reg_x++;
     update_zero_and_negative_flags(cpu, cpu->reg_x);
 }
 
-void iny(CPU *cpu)
-{
+void iny(CPU *cpu) {
     cpu->reg_y++;
     update_zero_and_negative_flags(cpu, cpu->reg_y);
 }
 
 // Jump instructions
 
-void jmp(CPU *cpu, AddrMode mode)
-{
+void jmp(CPU *cpu, AddrMode mode) {
     cpu->program_counter = get_operand_addr(cpu, mode, false);
 }
 
-void jsr(CPU *cpu)
-{
+void jsr(CPU *cpu) {
     stack_push_u16(cpu, cpu->program_counter + 2 - 1);
     uint16_t addr = mem_read_u16(cpu, cpu->program_counter);
     cpu->program_counter = addr;
@@ -645,69 +601,57 @@ void jsr(CPU *cpu)
 
 // Load instructions
 
-void lda(CPU *cpu, AddrMode mode)
-{
+void lda(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, true);
     uint8_t value = mem_read(cpu, addr);
     set_reg_a(cpu, value);
 }
 
-void ldx(CPU *cpu, AddrMode mode)
-{
+void ldx(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     set_reg_x(cpu, operand);
 }
 
-void ldy(CPU *cpu, AddrMode mode)
-{
+void ldy(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     set_reg_y(cpu, operand);
 }
 
-void lsr_acc(CPU *cpu)
-{
-    if ((cpu->reg_a & 1) != 0)
-    {
+void lsr_acc(CPU *cpu) {
+    if ((cpu->reg_a & 1) != 0) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     set_reg_a(cpu, cpu->reg_a >> 1);
 }
 
-void lsr(CPU *cpu, AddrMode mode)
-{
+void lsr(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
-    if ((operand & 1) != 0)
-    {
+    if ((operand & 1) != 0) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     mem_write(cpu, operand >> 1, addr);
     update_zero_and_negative_flags(cpu, operand >> 1);
 }
 
-void ora(CPU *cpu, AddrMode mode)
-{
+void ora(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     set_reg_a(cpu, cpu->reg_a | operand);
 }
 
 // Push instructions
 
-void pha(CPU *cpu)
-{
+void pha(CPU *cpu) {
     stack_push(cpu, cpu->reg_a);
 }
 
-void php(CPU *cpu)
-{
+void php(CPU *cpu) {
     uint8_t old_status_register = cpu->status;
     set_flag(cpu, BREAK_FLAG_0);
     set_flag(cpu, BREAK_FLAG_1);
@@ -717,14 +661,12 @@ void php(CPU *cpu)
 
 // Pull instructions
 
-void pla(CPU *cpu)
-{
+void pla(CPU *cpu) {
     uint8_t operand = stack_pull(cpu);
     set_reg_a(cpu, operand);
 }
 
-void plp(CPU *cpu)
-{
+void plp(CPU *cpu) {
     cpu->status = stack_pull(cpu);
     unset_flag(cpu, BREAK_FLAG_0); // This flag is ignored by this instruction
     set_flag(cpu, BREAK_FLAG_1); // This flag must always be set
@@ -732,79 +674,63 @@ void plp(CPU *cpu)
 
 // Rotate instructions
 
-void rol_acc(CPU *cpu)
-{
+void rol_acc(CPU *cpu) {
     uint8_t old_acc = cpu->reg_a;
     set_reg_a(cpu, cpu->reg_a << 1);
-    if (is_set(cpu, CARRY_FLAG))
-    {
+    if (is_set(cpu, CARRY_FLAG)) {
         set_reg_a(cpu, cpu->reg_a | 0x01);
     }
     
-    if ((old_acc & 0x80) != 0)
-    {
+    if ((old_acc & 0x80) != 0) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
 }
 
-void rol(CPU *cpu, AddrMode mode)
-{
+void rol(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
     uint8_t new_value = operand << 1;
-    if (is_set(cpu, CARRY_FLAG))
-    {
+    if (is_set(cpu, CARRY_FLAG)) {
         new_value |= 0x01;
     }
-    if (operand & 0x80)
-    {
+    if (operand & 0x80) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     mem_write(cpu, new_value, addr);
     update_zero_and_negative_flags(cpu, new_value);
 }
 
-void ror_acc(CPU *cpu)
-{
+void ror_acc(CPU *cpu) {
     uint8_t old_acc = cpu->reg_a;
     set_reg_a(cpu, cpu->reg_a >> 1);
-    if (is_set(cpu, CARRY_FLAG))
-    {
+    if (is_set(cpu, CARRY_FLAG)) {
         set_reg_a(cpu, cpu->reg_a | 0x80);
     }
-    if ((old_acc & 0x01) != 0)
-    {
+    if ((old_acc & 0x01) != 0) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
 }
 
-void ror(CPU *cpu, AddrMode mode)
-{
+void ror(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
     uint8_t new_value = operand >> 1;
-    if (is_set(cpu, CARRY_FLAG))
-    {
+    if (is_set(cpu, CARRY_FLAG)) {
         new_value |= 0x80;
     }
-    if ((operand & 0x01) != 0)
-    {
+    if ((operand & 0x01) != 0) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     mem_write(cpu, new_value, addr);
@@ -814,8 +740,7 @@ void ror(CPU *cpu, AddrMode mode)
 // Return instructions
 
 // Return from interrupt
-void rti(CPU *cpu)
-{
+void rti(CPU *cpu) {
     uint8_t flags = stack_pull(cpu);
     uint16_t program_counter = stack_pull_u16(cpu);
     cpu->status = flags;
@@ -825,14 +750,12 @@ void rti(CPU *cpu)
     cpu->program_counter = program_counter;
 }
 
-void rts(CPU *cpu)
-{
+void rts(CPU *cpu) {
     uint16_t program_counter = stack_pull_u16(cpu);
     cpu->program_counter = program_counter + 1;
 }
 
-void sbc(CPU *cpu, AddrMode mode)
-{
+void sbc(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     // Must be the one's complement, not the two's
     add_with_carry(cpu, ~operand);
@@ -840,141 +763,118 @@ void sbc(CPU *cpu, AddrMode mode)
 
 // Set flag instructions
 
-void sec(CPU *cpu)
-{
+void sec(CPU *cpu) {
     set_flag(cpu, CARRY_FLAG);
 }
 
-void sed(CPU *cpu)
-{
+void sed(CPU *cpu) {
     set_flag(cpu, DECIMAL_FLAG);
 }
 
-void sei(CPU *cpu)
-{
+void sei(CPU *cpu) {
     set_flag(cpu, INTERRUPT_FLAG);
 }
 
 // Store instructions
 
-void sta(CPU *cpu, AddrMode mode)
-{
+void sta(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     mem_write(cpu, cpu->reg_a, addr);
 }
 
-void stx(CPU *cpu, AddrMode mode)
-{
+void stx(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     mem_write(cpu, cpu->reg_x, addr);
 }
 
-void sty(CPU *cpu, AddrMode mode)
-{
+void sty(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     mem_write(cpu, cpu->reg_y, addr);
 }
 
 // Transfer instructions
 
-void tax(CPU *cpu)
-{
+void tax(CPU *cpu) {
     set_reg_x(cpu, cpu->reg_a);
 }
 
-void tay(CPU *cpu)
-{
+void tay(CPU *cpu) {
     set_reg_y(cpu, cpu->reg_a);
 }
 
-void tsx(CPU *cpu)
-{
+void tsx(CPU *cpu) {
     set_reg_x(cpu, cpu->stack_pointer);
 }
 
-void txa(CPU *cpu)
-{
+void txa(CPU *cpu) {
     set_reg_a(cpu, cpu->reg_x);
 }
 
-void txs(CPU *cpu)
-{
+void txs(CPU *cpu) {
     cpu->stack_pointer = cpu->reg_x;
 }
 
-void tya(CPU *cpu)
-{
+void tya(CPU *cpu) {
     set_reg_a(cpu, cpu->reg_y);
 }
 
 // Unofficial opcodes
 
-void anc(CPU *cpu, AddrMode mode)
-{
+void anc(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
     uint8_t result = operand & cpu->reg_a;
     set_reg_a(cpu, result);
     update_carry_flag(cpu, result);
 }
 
-void arr(CPU *cpu, AddrMode mode)
-{
+void arr(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
     uint8_t result = cpu->reg_a & operand;
     cpu->reg_a >>= 1;
     int bit_5 = (result >> 5) & 1;
     int bit_6 = (result >> 6) & 1;
     
-    if (bit_6)
-    {
+    if (bit_6) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
 
-    if (bit_5 ^ bit_6)
-    {
+    if (bit_5 ^ bit_6) {
         set_flag(cpu, OVERFLOW_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, OVERFLOW_FLAG);
     }
 
     update_zero_and_negative_flags(cpu, result);
 }
 
-void asr(CPU *cpu, AddrMode mode)
-{
+void asr(CPU *cpu, AddrMode mode) {
     and(cpu, mode);
     lsr(cpu, mode);
 }
 
-void dcp(CPU *cpu, AddrMode mode)
-{
+void dcp(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t operand = mem_read(cpu, addr);
     operand--;
     uint8_t compare_value = cpu->reg_a - operand;
     update_zero_and_negative_flags(cpu, compare_value);
-    if (compare_value <= 0)
-    {
+    if (compare_value <= 0) {
         set_flag(cpu, CARRY_FLAG);
     }
     // Just ignores the carry otherwise
     mem_write(cpu, operand, addr);
 }
 
-void isb(CPU *cpu, AddrMode mode)
-{
+void isb(CPU *cpu, AddrMode mode) {
     inc(cpu, mode);
     sbc(cpu, mode);
 }
 
-void lae(CPU *cpu, AddrMode mode)
-{
+void lae(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     uint8_t result = operand & cpu->stack_pointer;
     cpu->stack_pointer = result;
@@ -982,74 +882,63 @@ void lae(CPU *cpu, AddrMode mode)
     set_reg_x(cpu, result);
 }
 
-void lax(CPU *cpu, AddrMode mode)
-{
+void lax(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, true);
     set_reg_a(cpu, operand);
     set_reg_x(cpu, operand);
 }
 
-void lxa(CPU *cpu, AddrMode mode)
-{
+void lxa(CPU *cpu, AddrMode mode) {
     and(cpu, mode);
     tax(cpu);
 }
 
-void sha(CPU *cpu, AddrMode mode)
-{
+void sha(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t result = cpu->reg_a & cpu->reg_x;
     result &= 7;
     mem_write(cpu, result, addr);
 }
 
-void shs(CPU *cpu, AddrMode mode)
-{
+void shs(CPU *cpu, AddrMode mode) {
     cpu->stack_pointer = cpu->reg_x & cpu->reg_a;
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t result = cpu->stack_pointer & ((uint8_t) (addr >> 8) + 1);
     mem_write(cpu, result, addr);
 }
 
-void shx(CPU *cpu, AddrMode mode)
-{
+void shx(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t msb = addr >> 8;
     mem_write(cpu, cpu->reg_x & (msb + 1), addr);
 }
 
-void shy(CPU *cpu, AddrMode mode)
-{
+void shy(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t msb = addr >> 8;
     mem_write(cpu, cpu->reg_y & (msb + 1), addr);
 }
 
-void rla(CPU *cpu, AddrMode mode)
-{
+void rla(CPU *cpu, AddrMode mode) {
     rol(cpu, mode);
     and(cpu, mode);
 }
 
-void rra(CPU *cpu, AddrMode mode)
-{
+void rra(CPU *cpu, AddrMode mode) {
     ror(cpu, mode);
     adc(cpu, mode);
 }
 
-void sax(CPU *cpu, AddrMode mode)
-{
+void sax(CPU *cpu, AddrMode mode) {
     uint16_t addr = get_operand_addr(cpu, mode, false);
     uint8_t result = cpu->reg_a & cpu->reg_x;
     mem_write(cpu, result, addr);
 }
 
-void sbx(CPU *cpu, AddrMode mode)
-{
+void sbx(CPU *cpu, AddrMode mode) {
     uint8_t operand = get_operand(cpu, mode, false);
     uint8_t result = cpu->reg_x & cpu->reg_a;
-    if (operand <= result)
-    {
+    if (operand <= result) {
         set_flag(cpu, CARRY_FLAG);
     }
 
@@ -1057,21 +946,18 @@ void sbx(CPU *cpu, AddrMode mode)
     set_reg_x(cpu, result);
 }
 
-void slo(CPU *cpu, AddrMode mode)
-{
+void slo(CPU *cpu, AddrMode mode) {
     asl(cpu, mode);
     ora(cpu, mode);
 }
 
-void sre(CPU *cpu, AddrMode mode)
-{
+void sre(CPU *cpu, AddrMode mode) {
     lsr(cpu, mode);
     eor(cpu, mode);
 }
 
 // Exact operation unknown
-void xaa(CPU *cpu, AddrMode mode)
-{
+void xaa(CPU *cpu, AddrMode mode) {
     set_reg_a(cpu, cpu->reg_x);
     uint8_t operand = get_operand(cpu, mode, false);
     set_reg_a(cpu, cpu->reg_a & operand);
@@ -1081,67 +967,53 @@ void xaa(CPU *cpu, AddrMode mode)
 
 // Utility functions
 
-void branch(CPU *cpu, bool condition)
-{
+void branch(CPU *cpu, bool condition) {
     uint16_t original_pc = cpu->program_counter - 1;
-    if (condition)
-    {
+    if (condition) {
         cpu->program_counter += (int8_t) mem_read(cpu, cpu->program_counter);
         cpu->bus->cycles++; // Adds a cycle if the comparison is successful
         
         // Adds a cycle if page-crossing
         // Assumes that the reference point is the program counter at the opcode of the branch instruction
-        if (original_pc >> 8 != (cpu->program_counter + 1) >> 8)
-        {
+        if (original_pc >> 8 != (cpu->program_counter + 1) >> 8) {
             cpu->bus->cycles++;
         }
     }
     cpu->program_counter++;
 }
 
-void update_zero_and_negative_flags(CPU *cpu, uint8_t result)
-{
+void update_zero_and_negative_flags(CPU *cpu, uint8_t result) {
     // Update zero flag
-    if (result == 0)
-    {
+    if (result == 0) {
         set_flag(cpu, ZERO_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, ZERO_FLAG);
     }
     // Update negative flag
-    if ((result & 0b10000000) != 0)
-    {
+    if ((result & 0b10000000) != 0) {
         set_flag(cpu, NEGATIVE_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, NEGATIVE_FLAG);
     }
 }
 
-void update_carry_flag(CPU *cpu, uint8_t value)
-{
-    if ((value >> 7) == 1)
-    {
+void update_carry_flag(CPU *cpu, uint8_t value) {
+    if ((value >> 7) == 1) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
 }
 
-uint8_t get_operand(CPU *cpu, AddrMode mode, bool page_crossing)
-{
+uint8_t get_operand(CPU *cpu, AddrMode mode, bool page_crossing) {
     return mem_read(cpu, get_operand_addr(cpu, mode, page_crossing));
 }
 
-uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing)
-{
-    switch (mode)
-    {
+uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing) {
+    switch (mode) {
         uint16_t base_u16;
         uint16_t addr;
 
@@ -1155,16 +1027,14 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing)
         case AbsoluteX: 
             base_u16 = mem_read_u16(cpu, cpu->program_counter);
             addr = base_u16 + cpu->reg_x; 
-            if (page_crossing)
-            {
+            if (page_crossing) {
                 deal_with_page_crossing(cpu, base_u16, addr);
             }
             return addr;
         case AbsoluteY:
             base_u16 = mem_read_u16(cpu, cpu->program_counter);
             addr = base_u16 + cpu->reg_y;
-            if (page_crossing)
-            {
+            if (page_crossing) {
                 deal_with_page_crossing(cpu, base_u16, addr);
             }
             return addr;
@@ -1172,14 +1042,12 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing)
         // Indirect addressing modes wrap around if the address falls on a page boundary
         case Indirect:
             base_u16 = mem_read_u16(cpu, cpu->program_counter);
-            if ((base_u16 & 0xFF) == 0xFF)
-            {
+            if ((base_u16 & 0xFF) == 0xFF) {
                 uint8_t low = mem_read(cpu, base_u16);
                 uint8_t high = mem_read(cpu, base_u16 & 0xFF00);
                 return (uint16_t) high << 8 | low;
             }
-            else
-            {
+            else {
                 return mem_read_u16(cpu, base_u16);
             }
         case IndirectX:
@@ -1196,8 +1064,7 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing)
             uint8_t high_y = mem_read(cpu, base_y);
             base_u16 = (uint16_t) high_y << 8 | low_y;
             addr = base_u16 + cpu->program_counter;
-            if (page_crossing)
-            {
+            if (page_crossing) {
                 deal_with_page_crossing(cpu, base_u16, addr);
             }
             return addr;
@@ -1208,40 +1075,33 @@ uint16_t get_operand_addr(CPU *cpu, AddrMode mode, bool page_crossing)
 }
 
 // Made to implement both ADC and SBC more easily
-void add_with_carry(CPU *cpu, uint8_t operand)
-{
+void add_with_carry(CPU *cpu, uint8_t operand) {
     uint8_t carry_in = is_set(cpu, CARRY_FLAG);
     uint16_t sum = (uint16_t) cpu->reg_a + operand + carry_in;
     
     // Check if carry flag must be set
-    if (sum > 0xFF)
-    {
+    if (sum > 0xFF) {
         set_flag(cpu, CARRY_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, CARRY_FLAG);
     }
     
     // Check if overflow flag must be set
     // Check sources for a detailed explanation
     uint8_t result = (uint8_t) sum;
-    if (((cpu->reg_a ^ result) & (operand ^ result) & 0x80) != 0)
-    {
+    if (((cpu->reg_a ^ result) & (operand ^ result) & 0x80) != 0) {
         set_flag(cpu, OVERFLOW_FLAG);
     }
-    else
-    {
+    else {
         unset_flag(cpu, OVERFLOW_FLAG);
     }
     set_reg_a(cpu, result);
 }
 
 // Deals with instructions which take one more cycle if page-crossed
-void deal_with_page_crossing(CPU *cpu, uint16_t base_addr, uint16_t end_addr)
-{
-    if (base_addr >> 8 != end_addr >> 8)
-    {
+void deal_with_page_crossing(CPU *cpu, uint16_t base_addr, uint16_t end_addr) {
+    if (base_addr >> 8 != end_addr >> 8) {
         cpu->bus->cycles++;
     }
 }

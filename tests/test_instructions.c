@@ -18,8 +18,7 @@ void test_add_with_carry(void);
 void test_inc_instructions(void);
 void test_loops(void);
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     test_get_instruction_from_opcode();
     test_populate_inst_list();
     test_update_zero_and_negative_flags();
@@ -31,15 +30,13 @@ int main(int argc, char **argv)
     end_tests();
 }
 
-void test_get_instruction_from_opcode(void)
-{
+void test_get_instruction_from_opcode(void) {
     Instruction inst = get_instruction_from_opcode(0xA9);
     assert_eq(inst.opcode, 0xA9);
     assert_eq(inst.bytes, 2);
 }
 
-void test_populate_inst_list(void)
-{
+void test_populate_inst_list(void) {
     populate_inst_list();
     Instruction brk = inst_list[0x00];
     assert_eq(brk.opcode, 0x00);
@@ -48,8 +45,7 @@ void test_populate_inst_list(void)
     assert_eq(lda.mode, Immediate);
 }
 
-void test_update_zero_and_negative_flags(void)
-{
+void test_update_zero_and_negative_flags(void) {
     CPU *cpu = new_cpu();
     update_zero_and_negative_flags(cpu, 0);
     assert_eq(cpu->status, 0b00000010);
@@ -60,8 +56,7 @@ void test_update_zero_and_negative_flags(void)
     free(cpu);
 }
 
-void test_get_operand_addr(void)
-{
+void test_get_operand_addr(void) {
     CPU *cpu = new_cpu();
     cpu->program_counter = 15;
     assert_eq(get_operand_addr(cpu, Immediate), 15);
@@ -102,8 +97,7 @@ void test_get_operand_addr(void)
     free(cpu);
 }
 
-void test_instructions(void)
-{
+void test_instructions(void) {
     CPU *cpu = new_cpu();
     populate_inst_list();
 
@@ -115,8 +109,7 @@ void test_instructions(void)
 }
 
 // Tests the add with carry function and its instructions
-void test_add_with_carry(void)
-{
+void test_add_with_carry(void) {
     // Initialization
     CPU *cpu = new_cpu();
     populate_inst_list();
@@ -131,8 +124,7 @@ void test_add_with_carry(void)
     free(cpu);
 }
 
-void test_inc_instructions(void)
-{
+void test_inc_instructions(void) {
     CPU *cpu = new_cpu();
     reset(cpu);
     mem_write(cpu, 0x10, cpu->program_counter);
@@ -142,8 +134,7 @@ void test_inc_instructions(void)
     free(cpu);
 }
 
-void test_loops(void)
-{
+void test_loops(void) {
     CPU *cpu = new_cpu();
     populate_inst_list();
     uint8_t program[] = {

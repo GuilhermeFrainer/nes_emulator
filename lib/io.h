@@ -31,7 +31,7 @@ bool handle_input(CPU *cpu, SDL_Event *event);
 
 // Screen functions
 void draw_pixel(uint8_t *frame, int x, int y, Color color);
-void render_tile(uint8_t *frame, uint8_t *chr_rom, int bank, int tile_n);
+void render_tiles(uint8_t *frame, uint8_t *chr_rom, int bank);
 
 // Color functions
 Color get_color(uint8_t byte);
